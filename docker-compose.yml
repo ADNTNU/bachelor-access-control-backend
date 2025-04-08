@@ -1,0 +1,33 @@
+services:
+  #  app:
+  #    build:
+  #      context: .
+  #      dockerfile: Dockerfile.dev
+  #    ports:
+  #      - "8080:8080"
+  #    depends_on:
+  #      - db
+  #    environment:
+  #      DB_PORT: 3306
+  #    networks:
+  #      - backend
+
+  db:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: _9rGfw6nM-Cbv_Twnywx
+      MYSQL_DATABASE: dev
+      MYSQL_USER: dbeaver
+      MYSQL_PASSWORD: dbeaver
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - backend
+
+volumes:
+  mysql_data:
+
+networks:
+  backend:

@@ -19,4 +19,6 @@ public interface AdministratorRepository extends JpaRepository<Administrator, Lo
 
   @Query("SELECT a FROM Administrator a JOIN a.companies c WHERE c.id = :companyId")
   List<Administrator> findAdministratorsByCompanyId(long companyId, org.springframework.data.domain.Pageable pageable);
+
+  boolean existsByUsername(String username);
 }

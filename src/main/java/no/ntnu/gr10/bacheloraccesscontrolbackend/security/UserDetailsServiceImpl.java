@@ -25,9 +25,20 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     this.administratorRepository = administratorRepository;
   }
 
+  /**
+   * Loads user details by username.
+   * <p>
+   *   This method retrieves user details from the database based on the provided username.
+   *   If the user is not found, it throws a UsernameNotFoundException.
+   *   </p>
+   * @param username the username identifying the user whose data is required.
+   * @return UserDetails object containing user information.
+   * @throws UsernameNotFoundException if the user is not found.
+   */
   @Override
   public UserDetails loadUserByUsername(String username) {
-    return new UserDetailsImpl(administratorRepository.findByUsername(username)
+    return new UserDetailsImpl(
+            administratorRepository.findByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username)));
   }
 }

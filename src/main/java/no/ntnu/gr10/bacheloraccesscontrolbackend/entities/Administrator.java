@@ -24,13 +24,19 @@ public class Administrator {
     private Long id;
 
     @Column(nullable = false)
-    private boolean enabled;
+    private boolean enabled = true;
 
     @Column(unique = true, nullable = false)
     private String username;
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
 
     @ManyToMany
     @JoinTable(
@@ -49,9 +55,11 @@ public class Administrator {
      * @param username The username of the administrator.
      * @param password The password of the administrator.
      */
-    public Administrator(String username, String password) {
+    public Administrator(String username, String password, String firstName, String lastName) {
         setUsername(username);
         setPassword(password);
+        setFirstName(firstName);
+        setLastName(lastName);
     }
 
     /**
@@ -90,6 +98,40 @@ public class Administrator {
     public void setPassword(String password) {
 //        TODO: Add safe guard for password
         this.password = password;
+    }
+
+    /**
+     * Get the first name of the administrator.
+     * @return The first name of the administrator.
+     */
+    public String getFirstName() {
+        return firstName;
+    }
+
+    /**
+     * Set the first name of the administrator.
+     * @param firstName The first name to set.
+     */
+    public void setFirstName(String firstName) {
+//        TODO: Add safe guard for first name
+        this.firstName = firstName;
+    }
+
+    /**
+     * Get the last name of the administrator.
+     * @return The last name of the administrator.
+     */
+    public String getLastName() {
+        return lastName;
+    }
+
+    /**
+     * Set the last name of the administrator.
+     * @param lastName The last name to set.
+     */
+    public void setLastName(String lastName) {
+//        TODO: Add safe guard for last name
+        this.lastName = lastName;
     }
 
     /**
