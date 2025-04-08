@@ -1,4 +1,4 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.dto.requests;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto;
 
 /**
  * Data Transfer Object (DTO) for registration requests.

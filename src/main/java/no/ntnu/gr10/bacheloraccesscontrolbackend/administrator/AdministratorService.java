@@ -1,8 +1,6 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.services;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.administrator;
 
-import no.ntnu.gr10.bacheloraccesscontrolbackend.entities.Administrator;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.entities.ApiKey;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.repositories.AdministratorRepository;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.apiKey.ApiKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -100,7 +98,7 @@ public class AdministratorService {
    * @param administrator the Administrator entity to be created
    * @throws IllegalArgumentException if the username already exists
    */
-  public void createAdministrator(Administrator administrator) throws IllegalArgumentException {
+  public Administrator createAdministrator(Administrator administrator) throws IllegalArgumentException {
     // Check if the username already exists
     if (administratorRepository.existsByUsername(administrator.getUsername())) {
       throw new IllegalArgumentException("Username already exists");
@@ -110,7 +108,7 @@ public class AdministratorService {
     String encodedPassword = passwordEncoder.encode(administrator.getPassword());
     administrator.setPassword(encodedPassword);
 
-    administratorRepository.save(administrator);
+    return administratorRepository.save(administrator);
   }
 
 //  TODO: Add methods for creating, updating, and deleting administrators

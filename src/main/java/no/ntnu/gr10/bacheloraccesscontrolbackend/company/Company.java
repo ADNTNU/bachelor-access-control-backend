@@ -1,6 +1,7 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.entities;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.company;
 
 import jakarta.persistence.*;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
 
 import java.util.HashSet;
 import java.util.Objects;

@@ -1,7 +1,6 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.services;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.company;
 
-import no.ntnu.gr10.bacheloraccesscontrolbackend.entities.Company;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.repositories.CompanyRepository;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.company.dto.CompanySimpleDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +32,14 @@ public class CompanyService {
     return companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
   }
 
-  public List<Company> getCompaniesByAdministratorId(Long administratorId) {
-    return companyRepository.findByAdministratorId(administratorId);
+  public List<CompanySimpleDto> getSimpleCompaniesByAdministratorId(Long administratorId) {
+    return companyRepository.findByAdministratorId(administratorId).stream()
+            .map(company -> new CompanySimpleDto(company.getId(), company.getName()))
+            .toList();
+  }
+
+  public Company createCompany(Company company) {
+    return companyRepository.save(company);
   }
 
 //  TODO: Add methods for creating, updating, and deleting companies

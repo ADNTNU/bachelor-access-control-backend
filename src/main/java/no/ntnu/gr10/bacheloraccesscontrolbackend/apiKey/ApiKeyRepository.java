@@ -1,6 +1,5 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.repositories;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.apiKey;
 
-import no.ntnu.gr10.bacheloraccesscontrolbackend.entities.ApiKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

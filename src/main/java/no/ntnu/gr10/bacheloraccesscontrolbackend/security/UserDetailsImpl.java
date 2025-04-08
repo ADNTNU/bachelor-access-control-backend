@@ -1,6 +1,6 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
-import no.ntnu.gr10.bacheloraccesscontrolbackend.entities.Administrator;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -19,10 +19,12 @@ import java.util.List;
  */
 public class UserDetailsImpl implements UserDetails {
 
+  private final long id;
   private final String username;
   private final String password;
   private final boolean enabled;
   private final List<GrantedAuthority> authorities = new LinkedList<>();
+  private final String name;
 
   /**
    * Constructor that initializes the user details from an Administrator object.
@@ -30,9 +32,11 @@ public class UserDetailsImpl implements UserDetails {
    * @param administrator the Administrator object containing user details
    */
   public UserDetailsImpl(Administrator administrator) {
+    this.id = administrator.getId();
     this.username = administrator.getUsername();
     this.password = administrator.getPassword();
     this.enabled = administrator.isEnabled();
+    this.name = String.format("%s %s", administrator.getFirstName(), administrator.getLastName());
 //    convertRolesToAuthorities(administrator.getRoles());
   }
 
@@ -41,6 +45,15 @@ public class UserDetailsImpl implements UserDetails {
 //      authorities.add(new SimpleGrantedAuthority(role.getName()));
 //    }
 //  }
+
+  /**
+   * Gets the ID of the user.
+   *
+   * @return the ID of the user
+   */
+  public long getId() {
+    return id;
+  }
 
   @Override
   public String getUsername() {
@@ -58,7 +71,11 @@ public class UserDetailsImpl implements UserDetails {
   }
 
   @Override
-  public Collection<? extends GrantedAuthority> getAuthorities() {
+  public Collection<GrantedAuthority> getAuthorities() {
     return authorities;
+  }
+
+  public String getName() {
+    return name;
   }
 }

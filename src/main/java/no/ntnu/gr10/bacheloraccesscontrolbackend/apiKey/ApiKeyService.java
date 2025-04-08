@@ -1,7 +1,5 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.services;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.apiKey;
 
-import no.ntnu.gr10.bacheloraccesscontrolbackend.entities.ApiKey;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.repositories.ApiKeyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;

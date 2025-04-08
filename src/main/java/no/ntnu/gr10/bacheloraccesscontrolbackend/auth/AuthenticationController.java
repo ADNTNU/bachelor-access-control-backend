@@ -1,12 +1,14 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.controller;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.auth;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.requests.LoginRequest;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.requests.RegisterRequest;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.responses.AuthenticationResponse;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.entities.Administrator;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.LoginRequest;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.RegisterRequest;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.AuthenticationResponse;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.ErrorResponse;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.security.JwtTokenProvider;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.services.AdministratorService;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.security.UserDetailsImpl;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,16 +71,15 @@ public class AuthenticationController {
               loginRequest.password()
           )
       );
+      AuthenticationResponse response = authenticateAndGenerateResponse(authentication);
 
-      SecurityContextHolder.getContext().setAuthentication(authentication);
-      String jwt = tokenProvider.generateToken(authentication);
-      return ResponseEntity.ok(new AuthenticationResponse(jwt));
+      return ResponseEntity.ok(response);
     } catch (BadCredentialsException badCredentialsException) {
       System.err.println("Invalid credentials: " + badCredentialsException.getMessage());
-      return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Invalid username or password"));
     } catch (Exception e) {
       System.err.println("Error during authentication: " + e.getMessage());
-      return ResponseEntity.status(500).body("An error occurred during authentication");
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during authentication"));
     }
   }
 
@@ -97,11 +98,11 @@ public class AuthenticationController {
               registerRequest.lastName()
       );
     } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid registration data");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Invalid registration data"));
     }
 
     try {
-      administratorService.createAdministrator(admin);
+      admin = administratorService.createAdministrator(admin);
 
       Authentication authentication = authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
@@ -109,16 +110,29 @@ public class AuthenticationController {
               registerRequest.password()
           )
       );
-      SecurityContextHolder.getContext().setAuthentication(authentication);
+      AuthenticationResponse response = authenticateAndGenerateResponse(authentication);
 
-      String jwt = tokenProvider.generateToken(authentication);
-      return ResponseEntity.status(HttpStatus.CREATED).body(new AuthenticationResponse(jwt));
+      return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT).body("Username already exists");
+      return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse("Username already exists"));
     } catch (Exception e) {
       System.err.println("Error during registration: " + e.getMessage());
-      return ResponseEntity.status(500).body("An error occurred during registration");
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during registration"));
     }
+  }
+
+  private AuthenticationResponse authenticateAndGenerateResponse(Authentication authentication) {
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+    String jwt = tokenProvider.generateToken(authentication);
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+    return new AuthenticationResponse(
+            jwt,
+            userDetails.getId(),
+            userDetails.getUsername(),
+            userDetails.getAuthorities(),
+            userDetails.getName()
+    );
   }
 }

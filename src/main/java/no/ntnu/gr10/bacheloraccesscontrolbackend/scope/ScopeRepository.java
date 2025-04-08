@@ -1,6 +1,5 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.repositories;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.scope;
 
-import no.ntnu.gr10.bacheloraccesscontrolbackend.entities.Scope;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

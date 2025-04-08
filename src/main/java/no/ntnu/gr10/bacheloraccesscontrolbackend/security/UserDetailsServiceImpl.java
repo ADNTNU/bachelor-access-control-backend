@@ -1,6 +1,6 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
-import no.ntnu.gr10.bacheloraccesscontrolbackend.repositories.AdministratorRepository;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
