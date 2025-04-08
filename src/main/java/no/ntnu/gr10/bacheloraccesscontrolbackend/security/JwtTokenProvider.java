@@ -45,11 +45,12 @@ public class JwtTokenProvider {
     Date expirationDate = new Date(now.getTime() + expirationMs);
 
     return Jwts.builder()
-        .subject(admin.getUsername())
+        .subject(String.valueOf(admin.getId()))
         .issuedAt(now)
         .expiration(expirationDate)
-//       TODO: Add claims if needed
-//        .setClaims()
+//       TODO: Add more claims if needed
+        .claim("username", admin.getUsername())
+        .claim("roles", admin.getAuthorities())
         .signWith(getSigningKey())
         .compact();
   }
@@ -71,7 +72,7 @@ public class JwtTokenProvider {
           .build()
           .parseSignedClaims(token)
           .getPayload()
-          .getSubject();
+            .get("username", String.class);
   }
 
   private SecretKey getSigningKey() {

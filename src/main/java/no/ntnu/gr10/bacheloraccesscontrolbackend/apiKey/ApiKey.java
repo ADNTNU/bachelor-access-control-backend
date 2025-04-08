@@ -1,8 +1,12 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.entities;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.apiKey;
 
 import jakarta.persistence.*;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.scope.Scope;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -40,6 +44,14 @@ public class ApiKey {
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "company_id", nullable = false)
   private Company company;
+
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(
+          name = "api_key_scopes",
+          joinColumns = @JoinColumn(name = "api_key_id"),
+          inverseJoinColumns = @JoinColumn(name = "scope_id")
+  )
+  private Set<Scope> scopes = new HashSet<>();
 
   /**
    * Default constructor for JPA.
@@ -200,6 +212,21 @@ public class ApiKey {
     }
     this.company = company;
   }
+
+  /**
+   * Gets the scopes associated with the API key.
+   * @return The scopes associated with the API key.
+   */
+  public Set<Scope> getScopes() {
+    return scopes;
+  }
+
+  /**
+   * Sets the scopes associated with the API key.
+   * @param scopes The scopes to set.
+   * @throws IllegalArgumentException if the scopes are null.
+   */
+
 
   /**
    * Checks if two API keys are equal.

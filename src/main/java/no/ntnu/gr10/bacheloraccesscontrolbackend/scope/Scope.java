@@ -1,4 +1,4 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.entities;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.scope;
 
 import jakarta.persistence.*;
 

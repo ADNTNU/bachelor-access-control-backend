@@ -1,6 +1,5 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.repositories;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.administrator;
 
-import no.ntnu.gr10.bacheloraccesscontrolbackend.entities.Administrator;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

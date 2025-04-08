@@ -1,7 +1,5 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.services;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.scope;
 
-import no.ntnu.gr10.bacheloraccesscontrolbackend.entities.Scope;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.repositories.ScopeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
