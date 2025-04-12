@@ -16,6 +16,9 @@ public class Scope {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(nullable = false)
+  private boolean enabled = true;
+
   @Column(unique = true, nullable = false)
   private String name;
 
@@ -41,6 +44,33 @@ public class Scope {
    * Get the ID of the scope.
    *
    * @return The ID of the scope.
+   */
+  public long getId() {
+    return id;
+  }
+
+  /**
+   * Get the enabled status of the scope.
+   *
+   * @return true if the scope is enabled, false otherwise.
+   */
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  /**
+   * Set the enabled status of the scope.
+   *
+   * @param enabled The enabled status to set.
+   */
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+
+  /**
+   * Get the name of the scope.
+   *
+   * @return The name of the scope.
    */
   public String getName() {
     return name;
