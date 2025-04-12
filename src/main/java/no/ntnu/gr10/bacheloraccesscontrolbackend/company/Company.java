@@ -27,8 +27,8 @@ public class Company {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @ManyToMany(mappedBy = "companies")
-    private Set<Administrator> administrators = new HashSet<>();
+    @ManyToMany(mappedBy = "companies", fetch = FetchType.LAZY)
+    private final Set<Administrator> administrators = new HashSet<>();
 
     public Company() {
         // Default constructor for JPA
@@ -76,6 +76,8 @@ public class Company {
 
     /**
      * Adds an administrator to the company.
+     *
+     * @param administrator The administrator to add.
      */
     public void addAdministrator(Administrator administrator) {
         if (administrator == null) {
@@ -88,6 +90,8 @@ public class Company {
 
     /**
      * Removes an administrator from the company.
+     *
+     * @param administrator The administrator to remove.
      */
     public void removeAdministrator(Administrator administrator) {
         if (administrator == null) {

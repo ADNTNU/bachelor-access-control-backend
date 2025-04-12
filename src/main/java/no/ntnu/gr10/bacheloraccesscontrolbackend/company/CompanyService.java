@@ -32,12 +32,22 @@ public class CompanyService {
     return companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
   }
 
+  /**
+   * Get a list of simple company DTOs by administrator ID.
+   *
+   * @param administratorId the ID of the administrator
+   * @return a list of {@link CompanySimpleDto}
+   */
   public List<CompanySimpleDto> getSimpleCompaniesByAdministratorId(Long administratorId) {
-    return companyRepository.findByAdministratorId(administratorId).stream()
-            .map(company -> new CompanySimpleDto(company.getId(), company.getName()))
-            .toList();
+    return companyRepository.findCompanySimpleDtosByAdministratorId(administratorId);
   }
 
+  /**
+   * Creates a new company and saves it to the database.
+   *
+   * @param company the company to create
+   * @return the created company
+   */
   public Company createCompany(Company company) {
     return companyRepository.save(company);
   }

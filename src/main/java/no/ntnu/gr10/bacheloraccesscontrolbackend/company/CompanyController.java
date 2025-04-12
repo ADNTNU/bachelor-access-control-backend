@@ -51,6 +51,8 @@ public class CompanyController {
     }
   }
 
+//  TODO: Remove the temporary endpoint for creating a company
+//   when a proper solution is in place
   /**
    * Temporary endpoint to create a company.
    */
