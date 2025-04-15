@@ -1,6 +1,7 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.company;
 
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.dto.CompanySimpleDto;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.CompanyNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,8 @@ public class CompanyService {
    * @return the company
    */
   public Company getCompanyById(Long id) {
-    return companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
+    return companyRepository.findById(id)
+            .orElseThrow(() -> new CompanyNotFoundException("Company not found"));
   }
 
   /**

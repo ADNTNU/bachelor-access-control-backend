@@ -9,12 +9,15 @@ import jakarta.persistence.*;
  * </p>
  */
 @Entity
-@Table(name = "scopes")
+@Table(name = "api_scopes")
 public class Scope {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @Column(name = "scope_key", unique = true, nullable = false)
+  private String key;
 
   @Column(nullable = false)
   private boolean enabled = true;
@@ -32,10 +35,12 @@ public class Scope {
   /**
    * Constructor for creating a new scope.
    *
+   * @param key         The unique key for the scope.
    * @param name        The name of the scope.
    * @param description A description of the scope.
    */
-  public Scope(String name, String description) {
+  public Scope(String key, String name, String description) {
+    setKey(key);
     setName(name);
     setDescription(description);
   }
@@ -47,6 +52,34 @@ public class Scope {
    */
   public long getId() {
     return id;
+  }
+
+  /**
+   * Get the unique key of the scope.
+   *
+   * @return The unique key of the scope.
+   */
+  public String getKey() {
+    return key;
+  }
+
+  /**
+   * Set the unique key of the scope.
+   *
+   * @param key The unique key to set.
+   * @throws IllegalArgumentException if the key is null or empty.
+   * @throws IllegalArgumentException if the key exceeds 50 characters.
+   */
+  public void setKey(String key) {
+    if (key == null || key.isEmpty()) {
+      throw new IllegalArgumentException("Scope key cannot be null or empty");
+    }
+
+    if (key.length() > 50) {
+      throw new IllegalArgumentException("Scope key cannot exceed 50 characters");
+    }
+
+    this.key = key;
   }
 
   /**
