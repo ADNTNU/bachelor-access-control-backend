@@ -1,8 +1,10 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtTokenProvider jwtTokenProvider;
   private final UserDetailsService userDetailsService;
 
+  private final ObjectMapper objectMapper = new ObjectMapper();
+
   @Autowired
   public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
     this.jwtTokenProvider = jwtTokenProvider;
@@ -52,12 +56,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         registerUserAsAuthenticated(request, userDetails);
       }
     } catch (JwtException | IllegalArgumentException ex) {
-      response.setStatus(HttpStatus.UNAUTHORIZED.value());
-      response.getWriter().write("Invalid JWT token");
+      writeJsonError(response, HttpStatus.UNAUTHORIZED, "Invalid JWT token");
       return;
     } catch (UsernameNotFoundException ex) {
-      response.setStatus(HttpStatus.UNAUTHORIZED.value());
-      response.getWriter().write("User not found");
+      writeJsonError(response, HttpStatus.UNAUTHORIZED, "User not found");
       return;
     }
 
@@ -78,4 +80,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
     SecurityContextHolder.getContext().setAuthentication(auth);
   }
+
+  private void writeJsonError(HttpServletResponse response, HttpStatus status, String message) throws IOException {
+    response.setContentType("application/json");
+    response.setStatus(status.value());
+
+    ErrorResponse errorResponse = new ErrorResponse(message);
+    String json = objectMapper.writeValueAsString(errorResponse);
+
+    response.getWriter().write(json);
+  }
+
 }

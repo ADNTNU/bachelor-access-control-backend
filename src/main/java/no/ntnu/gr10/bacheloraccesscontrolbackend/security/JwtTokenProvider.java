@@ -1,5 +1,6 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.InvalidKeyException;
@@ -24,12 +25,15 @@ public class JwtTokenProvider {
   @Value("${jwt_secret}")
   private String secretKey;
 
+  private static final String USERNAME_CLAIM = "username";
+  private static final String ROLES_CLAIM = "roles";
+
 
   /**
    * Generates a JWT token for the given authentication.
    * <p>
-   *   This method creates a JWT token using the provided authentication information.
-   *   The token includes the username, issued date, and expiration date.
+   * This method creates a JWT token using the provided authentication information.
+   * The token includes the username, issued date, and expiration date.
    * </p>
    *
    * @param authentication the authentication object containing user details
@@ -45,34 +49,44 @@ public class JwtTokenProvider {
     Date expirationDate = new Date(now.getTime() + expirationMs);
 
     return Jwts.builder()
-        .subject(String.valueOf(admin.getId()))
-        .issuedAt(now)
-        .expiration(expirationDate)
+            .subject(String.valueOf(admin.getId()))
+            .issuedAt(now)
+            .expiration(expirationDate)
 //       TODO: Add more claims if needed
-        .claim("username", admin.getUsername())
-        .claim("roles", admin.getAuthorities())
-        .signWith(getSigningKey())
-        .compact();
+            .claim(USERNAME_CLAIM, admin.getUsername())
+            .claim(ROLES_CLAIM, admin.getAuthorities())
+            .signWith(getSigningKey())
+            .compact();
   }
 
   /**
    * Verifies the given JWT token and retrieves the username from it.
    * <p>
-   *   This method checks the validity of the provided JWT token and extracts the username from it.
+   * This method checks the validity of the provided JWT token and extracts the username from it.
    * </p>
    *
    * @param token the JWT token to verify
    * @return the username extracted from the token
-   * @throws JwtException if the token is invalid or expired
+   * @throws JwtException             if the token is invalid or expired
    * @throws IllegalArgumentException if the token is null or empty
    */
   public String verifyTokenAndGetUsername(String token) throws JwtException, IllegalArgumentException {
+    Claims claims = verifyTokenAndGetClaims(token);
+
+    return claims
+            .get(USERNAME_CLAIM, String.class);
+  }
+
+  private Claims verifyTokenAndGetClaims(String token) throws JwtException, IllegalArgumentException {
+    if (token == null || token.isEmpty()) {
+      throw new IllegalArgumentException("Token is null or empty");
+    }
+
     return Jwts.parser()
-          .verifyWith(getSigningKey())
-          .build()
-          .parseSignedClaims(token)
-          .getPayload()
-            .get("username", String.class);
+            .verifyWith(getSigningKey())
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
   }
 
   private SecretKey getSigningKey() {

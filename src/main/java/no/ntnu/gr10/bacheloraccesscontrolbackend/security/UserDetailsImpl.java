@@ -1,12 +1,15 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Custom implementation of the UserDetails interface.
@@ -23,8 +26,9 @@ public class UserDetailsImpl implements UserDetails {
   private final String username;
   private final String password;
   private final boolean enabled;
-  private final List<GrantedAuthority> authorities = new LinkedList<>();
+  private final List<GrantedAuthority> authorities;
   private final String name;
+  private final Set<Long> companyIds;
 
   /**
    * Constructor that initializes the user details from an Administrator object.
@@ -37,6 +41,10 @@ public class UserDetailsImpl implements UserDetails {
     this.password = administrator.getPassword();
     this.enabled = administrator.isEnabled();
     this.name = String.format("%s %s", administrator.getFirstName(), administrator.getLastName());
+    this.companyIds = administrator.getCompanies().stream()
+            .map(Company::getId)
+            .collect(Collectors.toSet());
+    this.authorities = new LinkedList<>();
 //    convertRolesToAuthorities(administrator.getRoles());
   }
 
@@ -77,5 +85,9 @@ public class UserDetailsImpl implements UserDetails {
 
   public String getName() {
     return name;
+  }
+
+  public Set<Long> getCompanyIds() {
+    return companyIds;
   }
 }
