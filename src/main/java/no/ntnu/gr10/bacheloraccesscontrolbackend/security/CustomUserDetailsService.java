@@ -16,12 +16,12 @@ import org.springframework.stereotype.Service;
  * @version 06.04.2025
  */
 @Service
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
   private final AdministratorRepository administratorRepository;
 
   @Autowired
-  public UserDetailsServiceImpl(AdministratorRepository administratorRepository) {
+  public CustomUserDetailsService(AdministratorRepository administratorRepository) {
     this.administratorRepository = administratorRepository;
   }
 
@@ -37,7 +37,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
    */
   @Override
   public UserDetails loadUserByUsername(String username) {
-    return new UserDetailsImpl(
+    return new CustomUserDetails(
             administratorRepository.findWithCompaniesByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username)));
   }

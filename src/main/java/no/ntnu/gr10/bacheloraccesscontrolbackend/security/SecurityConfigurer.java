@@ -34,11 +34,11 @@ public class SecurityConfigurer {
   @Value("#{'${cors.allowedOrigins}'.split(',')}")
   private List<String> allowedOrigins;
 
-  private final UserDetailsServiceImpl userDetailsService;
+  private final CustomUserDetailsService userDetailsService;
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
   @Autowired
-  public SecurityConfigurer(UserDetailsServiceImpl userDetailsService,
+  public SecurityConfigurer(CustomUserDetailsService userDetailsService,
                             JwtAuthenticationFilter jwtAuthenticationFilter) {
     this.userDetailsService = userDetailsService;
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;

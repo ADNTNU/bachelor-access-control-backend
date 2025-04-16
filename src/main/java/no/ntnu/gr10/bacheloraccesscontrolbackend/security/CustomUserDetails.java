@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @author Anders Lund
  * @version 07.04.2025
  */
-public class UserDetailsImpl implements UserDetails {
+public class CustomUserDetails implements UserDetails {
 
   private final long id;
   private final String username;
@@ -35,7 +35,7 @@ public class UserDetailsImpl implements UserDetails {
    *
    * @param administrator the Administrator object containing user details
    */
-  public UserDetailsImpl(Administrator administrator) {
+  public CustomUserDetails(Administrator administrator) {
     this.id = administrator.getId();
     this.username = administrator.getUsername();
     this.password = administrator.getPassword();

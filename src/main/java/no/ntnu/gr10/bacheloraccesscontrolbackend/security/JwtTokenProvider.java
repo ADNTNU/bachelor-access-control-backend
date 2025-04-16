@@ -41,7 +41,7 @@ public class JwtTokenProvider {
    * @throws InvalidKeyException if the signing key is invalid
    */
   public String generateToken(Authentication authentication) throws InvalidKeyException {
-    UserDetailsImpl admin = (UserDetailsImpl) authentication.getPrincipal();
+    CustomUserDetails admin = (CustomUserDetails) authentication.getPrincipal();
 
     Date now = new Date();
     // 24h
