@@ -42,12 +42,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-          throws IOException, ServletException {
-
-    String token = getJwtFromRequest(request);
-
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
     try {
+      String token = getJwtFromRequest(request);
+
       if (token != null) {
         String username = jwtTokenProvider.verifyTokenAndGetUsername(token);
 
@@ -55,15 +53,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         registerUserAsAuthenticated(request, userDetails);
       }
+
+      filterChain.doFilter(request, response);
     } catch (JwtException | IllegalArgumentException ex) {
       writeJsonError(response, HttpStatus.UNAUTHORIZED, "Invalid JWT token");
-      return;
     } catch (UsernameNotFoundException ex) {
       writeJsonError(response, HttpStatus.UNAUTHORIZED, "User not found");
-      return;
+    } catch (Exception ex) {
+      System.err.println("An error occurred while running the filter: " + ex.getMessage());
+      writeJsonError(response, HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while processing the token");
     }
-
-    filterChain.doFilter(request, response);
   }
 
   private String getJwtFromRequest(HttpServletRequest request) {
@@ -81,7 +80,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     SecurityContextHolder.getContext().setAuthentication(auth);
   }
 
-  private void writeJsonError(HttpServletResponse response, HttpStatus status, String message) throws IOException {
+  private void writeJsonError(HttpServletResponse response, HttpStatus status, String message) {
+    try {
     response.setContentType("application/json");
     response.setStatus(status.value());
 
@@ -89,6 +89,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String json = objectMapper.writeValueAsString(errorResponse);
 
     response.getWriter().write(json);
+    } catch (Exception e) {
+      System.err.printf("Error writing JSON error response: %s%n. Original error: %s%n", e.getMessage(), message);
+      response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+      try {
+        response.getWriter().write("Internal server error");
+      } catch (IOException ioException) {
+        System.err.println("Error writing internal server error response: " + ioException.getMessage());
+      }
+    }
   }
-
 }
