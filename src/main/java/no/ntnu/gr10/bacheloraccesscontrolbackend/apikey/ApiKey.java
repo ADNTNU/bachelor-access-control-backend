@@ -1,9 +1,10 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.apiKey;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.apikey;
 
 import jakarta.persistence.*;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.scope.Scope;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -51,7 +52,7 @@ public class ApiKey {
           joinColumns = @JoinColumn(name = "api_key_id"),
           inverseJoinColumns = @JoinColumn(name = "scope_id")
   )
-  private Set<Scope> scopes = new HashSet<>();
+  private final Set<Scope> scopes = new HashSet<>();
 
   /**
    * Default constructor for JPA.
@@ -226,6 +227,13 @@ public class ApiKey {
    * @param scopes The scopes to set.
    * @throws IllegalArgumentException if the scopes are null.
    */
+  public void setScopes(Collection<Scope> scopes) {
+    if (scopes == null) {
+      throw new IllegalArgumentException("Scopes cannot be null");
+    }
+    this.scopes.clear();
+    this.scopes.addAll(scopes);
+  }
 
 
   /**

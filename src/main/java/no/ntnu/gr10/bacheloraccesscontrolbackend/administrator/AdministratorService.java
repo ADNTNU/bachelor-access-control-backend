@@ -1,6 +1,6 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.administrator;
 
-import no.ntnu.gr10.bacheloraccesscontrolbackend.apiKey.ApiKey;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.ApiKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,20 +27,6 @@ public class AdministratorService {
                               PasswordEncoder passwordEncoder) {
     this.administratorRepository = administratorRepository;
     this.passwordEncoder = passwordEncoder;
-  }
-
-  /**
-   * Find an Administrator by username.
-   * <p>
-   *   This method retrieves an Administrator entity from the database based on the provided username.
-   *   If the Administrator is not found, it throws a UsernameNotFoundException.
-   * </p>
-   * @param username the username of the Administrator to be found
-   * @return the found {@link Administrator} entity
-   */
-  public Administrator findByUsername(String username) {
-    return administratorRepository.findByUsername(username)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 
   /**

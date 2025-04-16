@@ -1,8 +1,8 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.administrator;
 
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -20,4 +20,7 @@ public interface AdministratorRepository extends JpaRepository<Administrator, Lo
   List<Administrator> findAdministratorsByCompanyId(long companyId, org.springframework.data.domain.Pageable pageable);
 
   boolean existsByUsername(String username);
+
+  @EntityGraph(attributePaths = "companies")
+  Optional<Administrator> findWithCompaniesByUsername(String username);
 }

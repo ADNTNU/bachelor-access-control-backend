@@ -7,7 +7,7 @@ import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.AuthenticationResponse
 import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.ErrorResponse;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.security.JwtTokenProvider;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.security.UserDetailsImpl;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.security.CustomUserDetails;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -102,7 +102,7 @@ public class AuthenticationController {
     }
 
     try {
-      admin = administratorService.createAdministrator(admin);
+      administratorService.createAdministrator(admin);
 
       Authentication authentication = authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
@@ -125,7 +125,7 @@ public class AuthenticationController {
   private AuthenticationResponse authenticateAndGenerateResponse(Authentication authentication) {
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = tokenProvider.generateToken(authentication);
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
     return new AuthenticationResponse(
             jwt,

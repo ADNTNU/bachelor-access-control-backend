@@ -39,7 +39,9 @@ public class Administrator {
     @Column(nullable = false)
     private String lastName;
 
-    @ManyToMany
+    @ManyToMany(
+            fetch = FetchType.LAZY
+    )
     @JoinTable(
             name = "administrator_company",
             joinColumns = @JoinColumn(name = "administrator_id"),
