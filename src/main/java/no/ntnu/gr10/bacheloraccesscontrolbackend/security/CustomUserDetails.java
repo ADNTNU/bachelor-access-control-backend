@@ -1,6 +1,7 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,20 +40,14 @@ public class CustomUserDetails implements UserDetails {
     this.id = administrator.getId();
     this.username = administrator.getUsername();
     this.password = administrator.getPassword();
-    this.enabled = administrator.isEnabled();
+    this.enabled = administrator.isRegistered();
     this.name = String.format("%s %s", administrator.getFirstName(), administrator.getLastName());
-    this.companyIds = administrator.getCompanies().stream()
+    this.companyIds = administrator.getAdministratorCompanies().stream()
+            .map(AdministratorCompany::getCompany)
             .map(Company::getId)
             .collect(Collectors.toSet());
     this.authorities = new LinkedList<>();
-//    convertRolesToAuthorities(administrator.getRoles());
   }
-
-//  private void convertRolesToAuthorities(Set<Role> roles) {
-//    for (Role role : roles) {
-//      authorities.add(new SimpleGrantedAuthority(role.getName()));
-//    }
-//  }
 
   /**
    * Gets the ID of the user.

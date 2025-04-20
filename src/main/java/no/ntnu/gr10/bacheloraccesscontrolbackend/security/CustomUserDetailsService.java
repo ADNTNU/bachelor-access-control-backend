@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-
   private final AdministratorRepository administratorRepository;
 
   @Autowired
@@ -38,7 +37,7 @@ public class CustomUserDetailsService implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(String username) {
     return new CustomUserDetails(
-            administratorRepository.findWithCompaniesByUsername(username)
+            administratorRepository.findWithAdministratorCompaniesByUsername(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username)));
   }
 }

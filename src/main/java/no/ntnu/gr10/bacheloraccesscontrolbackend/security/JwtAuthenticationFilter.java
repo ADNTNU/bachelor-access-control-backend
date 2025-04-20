@@ -3,11 +3,11 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -42,12 +42,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
+  protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) {
     try {
       String token = getJwtFromRequest(request);
 
       if (token != null) {
-        String username = jwtTokenProvider.verifyTokenAndGetUsername(token);
+        String username = jwtTokenProvider.verifyAuthTokenAndGetUsername(token);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
@@ -60,7 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     } catch (UsernameNotFoundException ex) {
       writeJsonError(response, HttpStatus.UNAUTHORIZED, "User not found");
     } catch (Exception ex) {
-      System.err.println("An error occurred while running the filter: " + ex.getMessage());
+      logger.error("An error occurred while running the filter: " + ex.getMessage());
       writeJsonError(response, HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while processing the token");
     }
   }
@@ -90,12 +90,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     response.getWriter().write(json);
     } catch (Exception e) {
-      System.err.printf("Error writing JSON error response: %s%n. Original error: %s%n", e.getMessage(), message);
+      logger.error(String.format("Error writing JSON error response: %s%n. Original error: %s%n", e.getMessage(), message));
       response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
       try {
         response.getWriter().write("Internal server error");
       } catch (IOException ioException) {
-        System.err.println("Error writing internal server error response: " + ioException.getMessage());
+        logger.error("Error writing internal server error response: " + ioException.getMessage());
       }
     }
   }

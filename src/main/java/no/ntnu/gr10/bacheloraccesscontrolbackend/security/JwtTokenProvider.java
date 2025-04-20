@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.InvalidKeyException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,11 @@ public class JwtTokenProvider {
   private static final String USERNAME_CLAIM = "username";
   private static final String ROLES_CLAIM = "roles";
 
+  private static final String INVITE_TOKEN_SUBJECT = "invite";
+  private static final String COMPANY_ID_CLAIM = "companyId";
+  private static final String ADMIN_ID_CLAIM = "adminId";
+  private static final String ADMIN_REGISTERED_CLAIM = "adminRegistered";
+
 
   /**
    * Generates a JWT token for the given authentication.
@@ -40,19 +46,18 @@ public class JwtTokenProvider {
    * @return the generated JWT token
    * @throws InvalidKeyException if the signing key is invalid
    */
-  public String generateToken(Authentication authentication) throws InvalidKeyException {
+  public String generateAuthToken(Authentication authentication) throws InvalidKeyException {
     CustomUserDetails admin = (CustomUserDetails) authentication.getPrincipal();
 
     Date now = new Date();
     // 24h
-    long expirationMs = 86400000;
+    long expirationMs = 86400000; // 24 hours
     Date expirationDate = new Date(now.getTime() + expirationMs);
 
     return Jwts.builder()
             .subject(String.valueOf(admin.getId()))
             .issuedAt(now)
             .expiration(expirationDate)
-//       TODO: Add more claims if needed
             .claim(USERNAME_CLAIM, admin.getUsername())
             .claim(ROLES_CLAIM, admin.getAuthorities())
             .signWith(getSigningKey())
@@ -70,16 +75,48 @@ public class JwtTokenProvider {
    * @throws JwtException             if the token is invalid or expired
    * @throws IllegalArgumentException if the token is null or empty
    */
-  public String verifyTokenAndGetUsername(String token) throws JwtException, IllegalArgumentException {
+  public String verifyAuthTokenAndGetUsername(String token) throws JwtException {
     Claims claims = verifyTokenAndGetClaims(token);
 
     return claims
             .get(USERNAME_CLAIM, String.class);
   }
 
-  private Claims verifyTokenAndGetClaims(String token) throws JwtException, IllegalArgumentException {
+  public String generateInviteToken(String adminId, String companyId, boolean registered) throws InvalidKeyException {
+    Date now = new Date();
+    // 24h
+    long expirationMs = 1800000; // 30 minutes
+    Date expirationDate = new Date(now.getTime() + expirationMs);
+
+    return Jwts.builder()
+            .subject(INVITE_TOKEN_SUBJECT)
+            .claim(COMPANY_ID_CLAIM, companyId)
+            .claim(ADMIN_ID_CLAIM, adminId)
+            .claim(ADMIN_REGISTERED_CLAIM, registered)
+            .issuedAt(now)
+            .expiration(expirationDate)
+            .signWith(getSigningKey())
+            .compact();
+  }
+
+  public Pair<String, String> verifyInviteTokenAndGetCompanyAndAdminId(String token) throws JwtException {
+    Claims claims = verifyTokenAndGetClaims(token);
+
+    if (!claims.getSubject().equals(INVITE_TOKEN_SUBJECT)) {
+      throw new JwtException("Invalid token subject");
+    }
+
+    String companyId = claims
+            .get(COMPANY_ID_CLAIM, String.class);
+    String adminId = claims
+            .get(ADMIN_ID_CLAIM, String.class);
+
+    return Pair.of(companyId, adminId);
+  }
+
+  private Claims verifyTokenAndGetClaims(String token) throws JwtException {
     if (token == null || token.isEmpty()) {
-      throw new IllegalArgumentException("Token is null or empty");
+      throw new JwtException("Token cannot be null or empty");
     }
 
     return Jwts.parser()

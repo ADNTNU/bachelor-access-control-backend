@@ -1,4 +1,4 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.config;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
