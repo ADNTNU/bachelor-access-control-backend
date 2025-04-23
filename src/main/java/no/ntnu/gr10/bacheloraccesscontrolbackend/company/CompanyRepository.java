@@ -19,8 +19,10 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
                 "c.name " +
             ") " +
             "FROM Company c " +
-            "JOIN c.administrators a " +
-            "WHERE a.id = :administratorId " +
+            "JOIN c.administratorCompanies ac " +
+            "WHERE ac.id.administratorId = :administratorId " +
+            "AND ac.enabled = true " +
+            "AND ac.accepted = true " +
             "ORDER BY c.name")
     List<CompanySimpleDto> findCompanySimpleDtosByAdministratorId(Long administratorId);
 }

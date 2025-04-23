@@ -22,7 +22,7 @@ public class Scope {
   @Column(nullable = false)
   private boolean enabled = true;
 
-  @Column(unique = true, nullable = false)
+  @Column(nullable = false)
   private String name;
 
   @Column(nullable = false)

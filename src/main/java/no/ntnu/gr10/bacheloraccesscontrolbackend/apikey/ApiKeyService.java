@@ -1,10 +1,14 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.apikey;
 
 import jakarta.transaction.Transactional;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.dto.DeleteApiKeysRequest;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.*;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.CompanyService;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.ListResponse;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.requests.PaginatedCRUDListRequest;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.AdministratorCompanyNotFoundException;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.ApiKeyNotFoundException;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.CompanyNotFoundException;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.ScopeNotFoundException;
@@ -50,11 +54,11 @@ public class ApiKeyService {
    * @param request the request object containing the company ID, page number, and size
    * @return a paginated list of API keys associated with the specified company ID
    */
-  public ListResponse<ApiKeyListDto> getListOfApiKeysByCompanyId(ListApiKeysRequest request) {
-    int pageIndex = Math.max(0, request.page() - 1);
-    Pageable pageable = PageRequest.of(pageIndex, request.size());
+  public ListResponse<ApiKeyListDto> getListOfApiKeysByCompanyId(PaginatedCRUDListRequest request) {
+    int pageIndex = Math.max(0, request.getPage() - 1);
+    Pageable pageable = PageRequest.of(pageIndex, request.getSize());
 
-    Page<ApiKey> page = apiKeyRepository.findPageableByCompanyIdAndEnabledTrue(request.companyId(), pageable);
+    Page<ApiKey> page = apiKeyRepository.findPageableByCompanyId(request.getCompanyId(), pageable);
 
     return new ListResponse<>(
             page.getContent().stream()
@@ -63,6 +67,10 @@ public class ApiKeyService {
             page.getTotalPages(),
             page.getTotalElements()
     );
+  }
+
+  public List<ApiKey> getApiKeysByApiKeyIdsAndCompanyId(List<Long> apiKeyIds, long companyId) {
+    return apiKeyRepository.findByApiKeyIdsAndCompanyId(apiKeyIds, companyId);
   }
 
   /**
@@ -79,17 +87,17 @@ public class ApiKeyService {
    */
   @Transactional
   public CreateApiKeyResponse createApiKey(CreateApiKeyRequest createApiKeyRequest) {
-    Company company = companyService.getCompanyById(createApiKeyRequest.companyId());
+    Company company = companyService.getCompanyById(createApiKeyRequest.getCompanyId());
 
-    List<Scope> scopes = createApiKeyRequest.scopes().stream()
+    List<Scope> scopes = createApiKeyRequest.getScopes().stream()
             .map(scopeService::getScopeByScopeKey)
             .toList();
 
     ApiKey apiKey = new ApiKey(
-            createApiKeyRequest.enabled(),
+            createApiKeyRequest.getEnabled(),
             company,
-            createApiKeyRequest.name(),
-            createApiKeyRequest.description()
+            createApiKeyRequest.getName(),
+            createApiKeyRequest.getDescription()
     );
 
     apiKey.setScopes(scopes);
@@ -103,32 +111,25 @@ public class ApiKeyService {
     );
   }
 
-  public void deleteApiKey(Long id) {
-    if (!apiKeyRepository.existsById(id)) {
-      throw new ApiKeyNotFoundException("API key not found");
-    }
+  @Transactional
+  public void deleteApiKeys(DeleteApiKeysRequest deleteApiKeysRequest) throws AdministratorCompanyNotFoundException {
+    List<ApiKey> apiKeys = getApiKeysByApiKeyIdsAndCompanyId(deleteApiKeysRequest.getApiKeyIds(), deleteApiKeysRequest.getCompanyId());
 
-    apiKeyRepository.deleteById(id);
+    apiKeyRepository.deleteAll(apiKeys);
   }
 
   @Transactional
   public UpdateApiKeyResponse updateApiKey(Long id, UpdateApiKeyRequest updateApiKeyRequest) {
-    ApiKey apiKey = apiKeyRepository.findById(id)
+    ApiKey apiKey = apiKeyRepository.findByIdAndCompanyId(id, updateApiKeyRequest.getCompanyId())
             .orElseThrow(() -> new ApiKeyNotFoundException("API key not found"));
 
-    if (apiKey.getCompany().getId() != updateApiKeyRequest.companyId()) {
-      Company company = companyService.getCompanyById(updateApiKeyRequest.companyId());
-      apiKey.setCompany(company);
-    }
-
-
-    List<Scope> scopes = updateApiKeyRequest.scopes().stream()
+    List<Scope> scopes = updateApiKeyRequest.getScopes().stream()
             .map(scopeService::getScopeByScopeKey)
             .toList();
 
-    apiKey.setEnabled(updateApiKeyRequest.enabled());
-    apiKey.setName(updateApiKeyRequest.name());
-    apiKey.setDescription(updateApiKeyRequest.description());
+    apiKey.setEnabled(updateApiKeyRequest.isEnabled());
+    apiKey.setName(updateApiKeyRequest.getName());
+    apiKey.setDescription(updateApiKeyRequest.getDescription());
     apiKey.setScopes(scopes);
 
     apiKeyRepository.save(apiKey);

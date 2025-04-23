@@ -1,12 +1,40 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.company.dto;
 
-/**
- * Temporary DTO for creating a company.
- * A request object for creating a new company.
- * Contains the name of the company and the username of the administrator.
- *
- * @param name                 the name of the company
- * @param administratorUsername the username of the administrator
- */
-public record CreateCompanyRequest(String name, String administratorUsername) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public class CreateCompanyRequest {
+
+  @NotNull
+  @NotBlank
+  private String name;
+
+  @NotNull
+  @NotBlank
+  private String administratorUsername;
+
+  public CreateCompanyRequest() {
+    // Default constructor for deserialization
+  }
+
+  public CreateCompanyRequest(String name, String administratorUsername) {
+    this.name = name;
+    this.administratorUsername = administratorUsername;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getAdministratorUsername() {
+    return administratorUsername;
+  }
+
+  public void setAdministratorUsername(String administratorUsername) {
+    this.administratorUsername = administratorUsername;
+  }
 }

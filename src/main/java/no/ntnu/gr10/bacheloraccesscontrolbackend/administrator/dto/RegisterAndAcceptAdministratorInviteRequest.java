@@ -1,15 +1,12 @@
-package no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto;
+package no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public class RegisterRequest {
-
+public class RegisterAndAcceptAdministratorInviteRequest {
   @NotNull
   @NotBlank
-  @Email
-  private String username;
+  private String inviteToken;
 
   @NotNull
   @NotBlank
@@ -23,23 +20,23 @@ public class RegisterRequest {
   @NotBlank
   private String lastName;
 
-  public RegisterRequest() {
+  public RegisterAndAcceptAdministratorInviteRequest() {
     // Default constructor for deserialization
   }
 
-  public RegisterRequest(String username, String password, String firstName, String lastName) {
-    this.username = username;
+  public RegisterAndAcceptAdministratorInviteRequest(String inviteToken, String password, String firstName, String lastName) {
+    this.inviteToken = inviteToken;
     this.password = password;
     this.firstName = firstName;
     this.lastName = lastName;
   }
 
-  public String getUsername() {
-    return username;
+  public String getInviteToken() {
+    return inviteToken;
   }
 
-  public void setUsername(String username) {
-    this.username = username;
+  public void setInviteToken(String token) {
+    this.inviteToken = token;
   }
 
   public String getPassword() {

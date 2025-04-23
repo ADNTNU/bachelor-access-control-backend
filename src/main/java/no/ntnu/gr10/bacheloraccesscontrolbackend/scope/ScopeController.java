@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.logging.Logger;
+
 /**
  * Controller for handling scope-related requests.
  * Includes methods for fetching scope information.
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/scope")
 @Tag(name = "Scope", description = "Scope endpoints")
 public class ScopeController {
+
+  private final Logger logger = Logger.getLogger(getClass().getName());
 
   private final ScopeService scopeService;
 
@@ -34,7 +38,7 @@ public class ScopeController {
     try {
       return ResponseEntity.ok(scopeService.getAllSimpleScopes());
     } catch (Exception e) {
-      System.err.println("Error fetching scopes: " + e.getMessage());
+      logger.severe("Error fetching scopes: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred while fetching scopes"));
     }
   }

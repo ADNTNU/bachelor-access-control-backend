@@ -29,7 +29,7 @@ public class CompanyService {
    * @param id the ID of the company
    * @return the company
    */
-  public Company getCompanyById(Long id) {
+  public Company getCompanyById(Long id) throws CompanyNotFoundException {
     return companyRepository.findById(id)
             .orElseThrow(() -> new CompanyNotFoundException("Company not found"));
   }
