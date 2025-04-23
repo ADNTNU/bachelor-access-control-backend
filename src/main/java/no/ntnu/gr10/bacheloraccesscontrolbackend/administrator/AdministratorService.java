@@ -235,5 +235,36 @@ public class AdministratorService {
     return administratorRepository.existsByUsername(username);
   }
 
+  @Transactional
+  public void addAdministrator(InviteAdministratorRequest inviteAdministratorRequest) {
+    Company company = companyService.getCompanyById(inviteAdministratorRequest.getCompanyId());
+
+    @SuppressWarnings("squid:S6437")
+    String encodedPassword = passwordEncoder.encode("Test12345678");
+
+    Administrator administrator = administratorRepository.findByUsername(inviteAdministratorRequest.getUsername()).orElse(
+            new Administrator(
+                    inviteAdministratorRequest.getUsername(),
+
+                    encodedPassword, // Temporary password before user sets up the account
+                    "temporaryFirstName", // Temporary first name before user sets up the account
+                    "temporaryLastName" // Temporary last name before user sets up the account
+            )
+    );
+
+    AdministratorRole role = AdministratorRole.fromString(inviteAdministratorRequest.getRole());
+    AdministratorCompany ac = administrator.addCompanyWithRole(
+            company,
+            role
+    );
+
+    ac.setAccepted(true);
+    ac.setEnabled(true);
+
+    administrator.setRegistered(true);
+
+    administratorRepository.save(administrator);
+  }
+
 //  TODO: Add methods for creating, updating, and deleting administrators
 }

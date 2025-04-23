@@ -1,10 +1,12 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.company;
 
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.dto.CompanySimpleDto;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository interface for managing companies.
@@ -25,4 +27,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
             "AND ac.accepted = true " +
             "ORDER BY c.name")
     List<CompanySimpleDto> findCompanySimpleDtosByAdministratorId(Long administratorId);
+
+    @EntityGraph(attributePaths = {"administratorCompanies"})
+    Optional<Company> findByName(String companyA);
 }
