@@ -1,7 +1,7 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.apikey;
 
 import jakarta.transaction.Transactional;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.dto.DeleteApiKeysRequest;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.DeleteApiKeysRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.*;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;

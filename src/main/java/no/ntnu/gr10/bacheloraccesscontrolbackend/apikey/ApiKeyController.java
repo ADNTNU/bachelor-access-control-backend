@@ -1,8 +1,8 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.apikey;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.dto.DeleteApiKeysRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.CreateApiKeyRequest;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.DeleteApiKeysRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.requests.PaginatedCRUDListRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.UpdateApiKeyRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.CompanyService;
