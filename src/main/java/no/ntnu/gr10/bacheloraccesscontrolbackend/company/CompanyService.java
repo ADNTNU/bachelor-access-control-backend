@@ -1,6 +1,7 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.company;
 
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.dto.CompanySimpleDto;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.CompanyNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,16 +29,27 @@ public class CompanyService {
    * @param id the ID of the company
    * @return the company
    */
-  public Company getCompanyById(Long id) {
-    return companyRepository.findById(id).orElseThrow(() -> new RuntimeException("Company not found"));
+  public Company getCompanyById(Long id) throws CompanyNotFoundException {
+    return companyRepository.findById(id)
+            .orElseThrow(() -> new CompanyNotFoundException("Company not found"));
   }
 
+  /**
+   * Get a list of simple company DTOs by administrator ID.
+   *
+   * @param administratorId the ID of the administrator
+   * @return a list of {@link CompanySimpleDto}
+   */
   public List<CompanySimpleDto> getSimpleCompaniesByAdministratorId(Long administratorId) {
-    return companyRepository.findByAdministratorId(administratorId).stream()
-            .map(company -> new CompanySimpleDto(company.getId(), company.getName()))
-            .toList();
+    return companyRepository.findCompanySimpleDtosByAdministratorId(administratorId);
   }
 
+  /**
+   * Creates a new company and saves it to the database.
+   *
+   * @param company the company to create
+   * @return the created company
+   */
   public Company createCompany(Company company) {
     return companyRepository.save(company);
   }

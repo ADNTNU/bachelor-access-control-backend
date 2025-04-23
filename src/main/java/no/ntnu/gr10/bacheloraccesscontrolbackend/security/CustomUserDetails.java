@@ -1,12 +1,16 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Custom implementation of the UserDetails interface.
@@ -17,34 +21,33 @@ import java.util.List;
  * @author Anders Lund
  * @version 07.04.2025
  */
-public class UserDetailsImpl implements UserDetails {
+public class CustomUserDetails implements UserDetails {
 
   private final long id;
   private final String username;
   private final String password;
   private final boolean enabled;
-  private final List<GrantedAuthority> authorities = new LinkedList<>();
+  private final List<GrantedAuthority> authorities;
   private final String name;
+  private final Set<Long> companyIds;
 
   /**
    * Constructor that initializes the user details from an Administrator object.
    *
    * @param administrator the Administrator object containing user details
    */
-  public UserDetailsImpl(Administrator administrator) {
+  public CustomUserDetails(Administrator administrator) {
     this.id = administrator.getId();
     this.username = administrator.getUsername();
     this.password = administrator.getPassword();
-    this.enabled = administrator.isEnabled();
+    this.enabled = administrator.isRegistered();
     this.name = String.format("%s %s", administrator.getFirstName(), administrator.getLastName());
-//    convertRolesToAuthorities(administrator.getRoles());
+    this.companyIds = administrator.getAdministratorCompanies().stream()
+            .map(AdministratorCompany::getCompany)
+            .map(Company::getId)
+            .collect(Collectors.toSet());
+    this.authorities = new LinkedList<>();
   }
-
-//  private void convertRolesToAuthorities(Set<Role> roles) {
-//    for (Role role : roles) {
-//      authorities.add(new SimpleGrantedAuthority(role.getName()));
-//    }
-//  }
 
   /**
    * Gets the ID of the user.
@@ -77,5 +80,9 @@ public class UserDetailsImpl implements UserDetails {
 
   public String getName() {
     return name;
+  }
+
+  public Set<Long> getCompanyIds() {
+    return companyIds;
   }
 }

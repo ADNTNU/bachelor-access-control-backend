@@ -1,11 +1,13 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,6 +33,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtTokenProvider jwtTokenProvider;
   private final UserDetailsService userDetailsService;
 
+  private final ObjectMapper objectMapper = new ObjectMapper();
+
   @Autowired
   public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
     this.jwtTokenProvider = jwtTokenProvider;
@@ -38,30 +42,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   }
 
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-          throws IOException, ServletException {
-
-    String token = getJwtFromRequest(request);
-
+  protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) {
     try {
+      String token = getJwtFromRequest(request);
+
       if (token != null) {
-        String username = jwtTokenProvider.verifyTokenAndGetUsername(token);
+        String username = jwtTokenProvider.verifyAuthTokenAndGetUsername(token);
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         registerUserAsAuthenticated(request, userDetails);
       }
-    } catch (JwtException | IllegalArgumentException ex) {
-      response.setStatus(HttpStatus.UNAUTHORIZED.value());
-      response.getWriter().write("Invalid JWT token");
-      return;
-    } catch (UsernameNotFoundException ex) {
-      response.setStatus(HttpStatus.UNAUTHORIZED.value());
-      response.getWriter().write("User not found");
-      return;
-    }
 
-    filterChain.doFilter(request, response);
+      filterChain.doFilter(request, response);
+    } catch (JwtException | IllegalArgumentException ex) {
+      writeJsonError(response, HttpStatus.UNAUTHORIZED, "Invalid JWT token");
+    } catch (UsernameNotFoundException ex) {
+      writeJsonError(response, HttpStatus.UNAUTHORIZED, "User not found");
+    } catch (Exception ex) {
+      logger.error("An error occurred while running the filter: " + ex.getMessage());
+      writeJsonError(response, HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while processing the token");
+    }
   }
 
   private String getJwtFromRequest(HttpServletRequest request) {
@@ -77,5 +78,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     final UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
     SecurityContextHolder.getContext().setAuthentication(auth);
+  }
+
+  private void writeJsonError(HttpServletResponse response, HttpStatus status, String message) {
+    try {
+    response.setContentType("application/json");
+    response.setStatus(status.value());
+
+    ErrorResponse errorResponse = new ErrorResponse(message);
+    String json = objectMapper.writeValueAsString(errorResponse);
+
+    response.getWriter().write(json);
+    } catch (Exception e) {
+      logger.error(String.format("Error writing JSON error response: %s%n. Original error: %s%n", e.getMessage(), message));
+      response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+      try {
+        response.getWriter().write("Internal server error");
+      } catch (IOException ioException) {
+        logger.error("Error writing internal server error response: " + ioException.getMessage());
+      }
+    }
   }
 }

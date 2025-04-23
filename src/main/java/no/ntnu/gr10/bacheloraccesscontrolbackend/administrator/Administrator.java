@@ -1,8 +1,10 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.administrator;
 
 import jakarta.persistence.*;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -10,9 +12,9 @@ import java.util.Set;
 /**
  * Represents an administrator entity.
  * <p>
- *   This entity is used to store administrator information in the database.
- *   The administrator is associated with different companies and has a username and password for authentication.
- *   </p>
+ * This entity is used to store administrator information in the database.
+ * The administrator is associated with different companies and has a username and password for authentication.
+ * </p>
  *
  * @author Anders Lund
  * @version 06.04.2025
@@ -20,200 +22,248 @@ import java.util.Set;
 @Entity
 @Table(name = "administrators")
 public class Administrator {
-    @Id()
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id()
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private boolean enabled = true;
+  @Column(nullable = false)
+  private boolean registered = false;
 
-    @Column(unique = true, nullable = false)
-    private String username;
+  @Column(unique = true, nullable = false)
+  private String username;
 
-    @Column(nullable = false)
-    private String password;
+  @Column(nullable = false)
+  private String password;
 
-    @Column(nullable = false)
-    private String firstName;
+  @Column(nullable = false)
+  private String firstName;
 
-    @Column(nullable = false)
-    private String lastName;
+  @Column(nullable = false)
+  private String lastName;
 
-    @ManyToMany
-    @JoinTable(
-            name = "administrator_company",
-            joinColumns = @JoinColumn(name = "administrator_id"),
-            inverseJoinColumns = @JoinColumn(name = "company_id")
-    )
-    private Set<Company> companies = new HashSet<>();
+  @OneToMany(mappedBy = "administrator", cascade = CascadeType.ALL, orphanRemoval = true)
+  private final Set<AdministratorCompany> administratorCompanies = new HashSet<>();
 
-    public Administrator() {
-        // Default constructor for JPA
+
+  public Administrator() {
+    // Default constructor for JPA
+  }
+
+  /**
+   * Constructor for creating a new administrator.
+   *
+   * @param username The username of the administrator.
+   * @param password The password of the administrator.
+   */
+  public Administrator(String username, String password, String firstName, String lastName) {
+    setUsername(username);
+    setPassword(password);
+    setFirstName(firstName);
+    setLastName(lastName);
+  }
+
+  /**
+   * Gets the ID of the administrator.
+   *
+   * @return The ID of the administrator.
+   */
+  public Long getId() {
+    return id;
+  }
+
+  /**
+   * Get the registered status of the administrator.
+   *
+   * @return true if the administrator is registered, false otherwise.
+   */
+  public boolean isRegistered() {
+    return registered;
+  }
+
+  /**
+   * Set whether the administrator is registered or not.
+   *
+   * @param registered The registered status to set.
+   */
+  public void setRegistered(boolean registered) {
+    this.registered = registered;
+  }
+
+  /**
+   * Gets the username of the administrator.
+   *
+   * @return The username of the administrator.
+   */
+  public String getUsername() {
+    return username;
+  }
+
+  public void setUsername(String username) throws IllegalArgumentException {
+    if (username == null || username.isEmpty()) {
+      throw new IllegalArgumentException("Username cannot be null or empty");
+    }
+    if (username.length() > 254) {
+      throw new IllegalArgumentException("Username cannot exceed 254 characters");
     }
 
-    /**
-     * Constructor for creating a new administrator.
-     * @param username The username of the administrator.
-     * @param password The password of the administrator.
-     */
-    public Administrator(String username, String password, String firstName, String lastName) {
-        setUsername(username);
-        setPassword(password);
-        setFirstName(firstName);
-        setLastName(lastName);
+    this.username = username;
+  }
+
+  /**
+   * Gets the password of the administrator.
+   *
+   * @return The password of the administrator.
+   */
+  public String getPassword() {
+    return password;
+  }
+
+  /**
+   * Set the password for the administrator.
+   *
+   * @param password The password to set.
+   */
+  public void setPassword(String password) throws IllegalArgumentException {
+    if (password == null || password.isEmpty()) {
+      throw new IllegalArgumentException("Password cannot be null or empty");
+    }
+    this.password = password;
+  }
+
+  /**
+   * Get the first name of the administrator.
+   *
+   * @return The first name of the administrator.
+   */
+  public String getFirstName() {
+    return firstName;
+  }
+
+  /**
+   * Set the first name of the administrator.
+   *
+   * @param firstName The first name to set.
+   */
+  public void setFirstName(String firstName) throws IllegalArgumentException {
+    if (firstName == null || firstName.isEmpty()) {
+      throw new IllegalArgumentException("First name cannot be null or empty");
+    }
+    if (firstName.length() > 255) {
+      throw new IllegalArgumentException("First name cannot exceed 255 characters");
+    }
+    this.firstName = firstName;
+  }
+
+  /**
+   * Get the last name of the administrator.
+   *
+   * @return The last name of the administrator.
+   */
+  public String getLastName() {
+    return lastName;
+  }
+
+  /**
+   * Set the last name of the administrator.
+   *
+   * @param lastName The last name to set.
+   */
+  public void setLastName(String lastName) throws IllegalArgumentException {
+    if (lastName == null || lastName.isEmpty()) {
+      throw new IllegalArgumentException("Last name cannot be null or empty");
+    }
+    if (lastName.length() > 255) {
+      throw new IllegalArgumentException("Last name cannot exceed 255 characters");
+    }
+    this.lastName = lastName;
+  }
+
+  /**
+   * Checks whether two administrators are equal based on their ID and username.
+   *
+   * @param o The object to compare with.
+   * @return true if the administrators are equal, false otherwise.
+   */
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Administrator other)) return false;
+
+    return Objects.equals(id, other.id) && username.equals(other.username);
+  }
+
+  /**
+   * Returns the hash code of the administrator based on its ID and username.
+   *
+   * @return The hash code of the administrator.
+   */
+  @Override
+  public int hashCode() {
+    return Objects.hash(id, username);
+  }
+
+  /**
+   * Returns a string representation of the administrator.
+   * <p>
+   * This method returns a string representation of the administrator, including its ID, username, and enabled status.
+   * </p>
+   *
+   * @return A string representation of the administrator.
+   */
+  @Override
+  public String toString() {
+    return "Administrator{" +
+            "id=" + id +
+            ", registered=" + registered +
+            ", username='" + username + '\'' +
+            '}';
+  }
+
+  /**
+   * Get the company-administrator links associated with the administrator.
+   *
+   * @return A collection of {@link AdministratorCompany} links.
+   */
+  public Collection<AdministratorCompany> getAdministratorCompanies() {
+    return administratorCompanies;
+  }
+
+  /**
+   * Get the companies associated with the administrator.
+   *
+   * @return A collection of companies associated with the administrator.
+   */
+  public Collection<Company> getCompanies() {
+    Set<Company> companies = new HashSet<>();
+    for (AdministratorCompany link : administratorCompanies) {
+      companies.add(link.getCompany());
+    }
+    return companies;
+  }
+
+  /**
+   * Add a company with a specific role to the administrator.
+   *
+   * @param company The company to add.
+   * @param role    The role of the administrator in the company.
+   * @throws IllegalArgumentException if the company is null or if the administrator already has a link to this company.
+   */
+  public AdministratorCompany addCompanyWithRole(Company company, AdministratorRole role) throws IllegalArgumentException {
+    if (company == null) {
+      throw new IllegalArgumentException("Company cannot be null");
+    }
+    if (administratorCompanies.stream().anyMatch(link -> link.getCompany().equals(company))) {
+      throw new IllegalArgumentException("Administrator already has a link to this company");
     }
 
-    /**
-     * Gets the ID of the administrator.
-     * @return The ID of the administrator.
-     */
-    public Long getId() {
-        return id;
-    }
+    AdministratorCompany link = new AdministratorCompany();
 
-    /**
-     * Gets the username of the administrator.
-     * @return The username of the administrator.
-     */
-    public String getUsername() {
-        return username;
-    }
+    link.setAdministrator(this);
+    link.setCompany(company);
+    link.setRole(role);
 
-    private void setUsername(String username) {
-//        TODO: Add safe guard for username
-        this.username = username;
-    }
+    administratorCompanies.add(link);
 
-    /**
-     * Gets the password of the administrator.
-     * @return The password of the administrator.
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Set the password for the administrator.
-     * @param password The password to set.
-     */
-    public void setPassword(String password) {
-//        TODO: Add safe guard for password
-        this.password = password;
-    }
-
-    /**
-     * Get the first name of the administrator.
-     * @return The first name of the administrator.
-     */
-    public String getFirstName() {
-        return firstName;
-    }
-
-    /**
-     * Set the first name of the administrator.
-     * @param firstName The first name to set.
-     */
-    public void setFirstName(String firstName) {
-//        TODO: Add safe guard for first name
-        this.firstName = firstName;
-    }
-
-    /**
-     * Get the last name of the administrator.
-     * @return The last name of the administrator.
-     */
-    public String getLastName() {
-        return lastName;
-    }
-
-    /**
-     * Set the last name of the administrator.
-     * @param lastName The last name to set.
-     */
-    public void setLastName(String lastName) {
-//        TODO: Add safe guard for last name
-        this.lastName = lastName;
-    }
-
-    /**
-     * Get the enabled status of the administrator.
-     * @return true if the administrator is enabled, false otherwise.
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Set whether the administrator is enabled or not.
-     * @param enabled The enabled status to set.
-     */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    /**
-     * Get the companies associated with this administrator.
-     * @return A set of companies associated with this administrator.
-     */
-    public Set<Company> getCompanies() {
-        return companies;
-    }
-
-    /**
-     * Add a company to the set of companies associated with this administrator.
-     * @param company The company to add.
-     */
-    public void addCompany(Company company) {
-        this.companies.add(company);
-//        TODO: Verify if we need to add the administrator to the company as well
-         company.getAdministrators().add(this);
-    }
-
-    /**
-     * Remove a company from the set of companies associated with this administrator.
-     * @param company The company to remove.
-     */
-    public void removeCompany(Company company) {
-        this.companies.remove(company);
-//        TODO: Verify if we need to remove the administrator from the company as well
-         company.getAdministrators().remove(this);
-    }
-
-    /**
-     * Checks whether two administrators are equal based on their ID and username.
-     * @param o The object to compare with.
-     * @return true if the administrators are equal, false otherwise.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Administrator other)) return false;
-
-      return Objects.equals(id, other.id) && username.equals(other.username);
-    }
-
-    /**
-     * Returns the hash code of the administrator based on its ID and username.
-     * @return The hash code of the administrator.
-     */
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, username);
-    }
-
-    /**
-     * Returns a string representation of the administrator.
-     * <p>
-     *   This method returns a string representation of the administrator, including its ID, username, and enabled status.
-     *   </p>
-     * @return A string representation of the administrator.
-     */
-    @Override
-    public String toString() {
-        return "Administrator{" +
-                "id=" + id +
-                ", enabled=" + enabled +
-                ", username='" + username + '\'' +
-                '}';
-    }
+    return link;
+  }
 }

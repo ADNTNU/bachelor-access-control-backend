@@ -1,22 +1,25 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -34,42 +37,32 @@ public class SecurityConfigurer {
   @Value("#{'${cors.allowedOrigins}'.split(',')}")
   private List<String> allowedOrigins;
 
-  private final UserDetailsServiceImpl userDetailsService;
-  private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
-  @Autowired
-  public SecurityConfigurer(UserDetailsServiceImpl userDetailsService,
-                            JwtAuthenticationFilter jwtAuthenticationFilter) {
-    this.userDetailsService = userDetailsService;
-    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+  @Bean
+  public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
+    return new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
   }
 
   /**
-   * Configures the authentication manager builder to use a custom user details service for authentication.
+   * Configures CORS (Cross-Origin Resource Sharing) settings.
+   * This method sets up the allowed origins, methods, and headers for CORS requests.
    *
-   * @param auth The AuthenticationManagerBuilder to set up the authentication provider.
-   * @throws Exception Throws Exception if there's an error during configuration.
+   * @return a CorsConfigurationSource instance.
    */
-  @Autowired
-  protected void configureAuthentication(AuthenticationManagerBuilder auth) throws Exception {
-    auth.userDetailsService(userDetailsService);
-  }
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration config = new CorsConfiguration();
 
-//  @Bean
-//  public UrlBasedCorsConfigurationSource corsConfigurationSource() {
-//    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//
-//    CorsConfiguration config = new CorsConfiguration();
-//    config.setAllowedOrigins(allowedOrigins);  // List of allowed origins
-//    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));  // Allowed HTTP methods
-//    config.setAllowedHeaders(List.of("*"));
-//    boolean shouldAllowCredentials = allowedOrigins.stream().noneMatch(orig -> orig.equals("*"));
-//    config.setAllowCredentials(shouldAllowCredentials);  // Allow credentials (cookies, authorization headers)
-//
-//    source.registerCorsConfiguration("/**", config);  // Apply CORS configuration to all paths
-//
-//    return source;
-//  }
+    config.setAllowedOrigins(allowedOrigins);  // List of allowed origins
+    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));  // Allowed HTTP methods
+    config.setAllowedHeaders(List.of("*"));
+    boolean shouldAllowCredentials = allowedOrigins.stream().noneMatch(orig -> orig.equals("*"));
+    config.setAllowCredentials(shouldAllowCredentials);  // Allow credentials (cookies, authorization headers)
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", config);  // Apply CORS configuration to all paths
+
+    return source;
+  }
 
   /**
    * Configures the security filter chain for HTTP requests.
@@ -78,11 +71,9 @@ public class SecurityConfigurer {
    * @throws Exception Throws Exception if there's an error during configuration.
    */
   @Bean
-  protected SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {
-//    TODO: Add CORS and/or CSRF configuration if needed
+  protected SecurityFilterChain configure(HttpSecurity httpSecurity, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
     httpSecurity
             .csrf(AbstractHttpConfigurer::disable)
-//            .cors(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/auth/**").permitAll()
@@ -93,21 +84,30 @@ public class SecurityConfigurer {
   }
 
   /**
-   * Provides the authentication manager bean from authentication configuration.
+   * Configures the authentication manager for user authentication.
+   * Uses the provided UserDetailsService and PasswordEncoder defined with Bean methods.
    *
-   * @param config The authenticationConfiguration to retrieve the authentication manager.
+   * @param http The HttpSecurity object to configure.
+   * @param userDetailsService The UserDetailsService for loading user details.
+   * @param passwordEncoder The PasswordEncoder for encoding passwords.
    * @return an AuthenticationManager instance.
-   * @throws Exception Throws Exception if there's an error retrieving the authentication manager.
+   * @throws Exception Throws Exception if there's an error during configuration.
    */
   @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-    return config.getAuthenticationManager();
+  public AuthenticationManager authenticationManager(
+          HttpSecurity http,
+          UserDetailsService userDetailsService,
+          PasswordEncoder passwordEncoder) throws Exception {
+
+    AuthenticationManagerBuilder builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+    builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+    return builder.build();
   }
 
   /**
    * Password encoder bean to hash passwords securely.
    *
-   * @return a BCryptPasswordEncoder instance.
+   * @return BCryptPasswordEncoder instance for password encoding.
    */
   @Bean
   public PasswordEncoder passwordEncoder() {

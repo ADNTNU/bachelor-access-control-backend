@@ -1,6 +1,11 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.scope;
 
+import no.ntnu.gr10.bacheloraccesscontrolbackend.scope.dto.ScopeSimpleDto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository interface for managing scopes.
@@ -11,4 +16,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface ScopeRepository extends JpaRepository<Scope, Long> {
 
+  @Query("SELECT new no.ntnu.gr10.bacheloraccesscontrolbackend.scope.dto.ScopeSimpleDto(" +
+            "s.key, " +
+            "s.name, " +
+            "s.description" +
+          ") " +
+          "FROM Scope s " +
+          "WHERE s.enabled = true")
+  List<ScopeSimpleDto> findAllScopeSimpleDtos();
+
+  Optional<Scope> findByKey(String scopeKey);
 }
