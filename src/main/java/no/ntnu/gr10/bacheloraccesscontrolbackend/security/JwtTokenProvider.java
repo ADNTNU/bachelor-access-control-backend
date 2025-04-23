@@ -34,6 +34,8 @@ public class JwtTokenProvider {
   private static final String ADMIN_ID_CLAIM = "adminId";
   private static final String ADMIN_REGISTERED_CLAIM = "adminRegistered";
 
+  private static final String PASSWORD_RESET_TOKEN_SUBJECT = "passwordReset";
+  public static final int PASSWORD_RESET_TOKEN_EXPIRATION_MS = 1800000; // 30 minutes
 
   /**
    * Generates a JWT token for the given authentication.
@@ -82,6 +84,19 @@ public class JwtTokenProvider {
             .get(USERNAME_CLAIM, String.class);
   }
 
+  /**
+   * Generates an invite token for the given admin and company.
+   * <p>
+   * This method creates a JWT token for inviting an admin to a company.
+   * The token includes the company ID, admin ID and registration status.
+   * </p>
+   *
+   * @param adminId    the ID of the admin
+   * @param companyId  the ID of the company
+   * @param registered whether the admin is registered or not
+   * @return the generated invite token
+   * @throws InvalidKeyException if the signing key is invalid
+   */
   public String generateInviteToken(String adminId, String companyId, boolean registered) throws InvalidKeyException {
     Date now = new Date();
     // 24h
@@ -99,6 +114,17 @@ public class JwtTokenProvider {
             .compact();
   }
 
+  /**
+   * Verifies the given invite token and retrieves the company ID and admin ID from it.
+   * <p>
+   * This method checks the validity of the provided invite token and extracts the company ID and admin ID from it.
+   * </p>
+   *
+   * @param token the invite token to verify
+   * @return a pair containing the company ID and admin ID
+   * @throws JwtException             if the token is invalid or expired
+   * @throws IllegalArgumentException if the token is null or empty
+   */
   public Pair<String, String> verifyInviteTokenAndGetCompanyAndAdminId(String token) throws JwtException {
     Claims claims = verifyTokenAndGetClaims(token);
 
@@ -112,6 +138,30 @@ public class JwtTokenProvider {
             .get(ADMIN_ID_CLAIM, String.class);
 
     return Pair.of(companyId, adminId);
+  }
+
+  /**
+   * Generates a password reset token for the given admin.
+   * <p>
+   * This method creates a JWT token for resetting the password of an admin.
+   * The token includes the admin ID and expiration date.
+   * </p>
+   *
+   * @param adminId the ID of the admin
+   * @return the generated password reset token
+   * @throws InvalidKeyException if the signing key is invalid
+   */
+  public String generatePasswordResetToken(String adminId) throws InvalidKeyException {
+    Date now = new Date();
+    Date expirationDate = new Date(now.getTime() + PASSWORD_RESET_TOKEN_EXPIRATION_MS);
+
+    return Jwts.builder()
+            .subject(PASSWORD_RESET_TOKEN_SUBJECT)
+            .claim(ADMIN_ID_CLAIM, adminId)
+            .issuedAt(now)
+            .expiration(expirationDate)
+            .signWith(getSigningKey())
+            .compact();
   }
 
   private Claims verifyTokenAndGetClaims(String token) throws JwtException {
