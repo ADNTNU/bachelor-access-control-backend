@@ -90,7 +90,7 @@ public class AdministratorController {
     }
   }
 
-  @PostMapping("/register-and-accept-invite")
+  @PostMapping("/register-from-invite")
   public ResponseEntity<?> registerAndAcceptInvite(@RequestBody RegisterAndAcceptAdministratorInviteRequest acceptAdministratorInviteRequest) {
     try {
       administratorService.registerAdministratorAndAcceptInvite(acceptAdministratorInviteRequest);

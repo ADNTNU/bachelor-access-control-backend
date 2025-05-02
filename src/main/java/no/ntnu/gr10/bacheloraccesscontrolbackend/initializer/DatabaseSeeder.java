@@ -1,17 +1,19 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.initializer;
 
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorRepository;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorRole;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorService;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.dto.InviteAdministratorRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.CompanyRepository;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.company.CompanyService;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.scope.Scope;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.scope.ScopeRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Date;
 
 /**
  * This class is responsible for seeding the database with initial data.
@@ -22,29 +24,48 @@ public class DatabaseSeeder {
   @Bean
   public CommandLineRunner seedDatabase(ScopeRepository scopeRepository,
                                         AdministratorRepository administratorRepository,
-                                        CompanyRepository companyRepository, AdministratorService administratorService) {
+                                        CompanyRepository companyRepository, AdministratorService administratorService, PasswordEncoder passwordEncoder) {
     return args -> {
       // Create and save Scopes
-      if (scopeRepository.count() == 0) {
+      if (scopeRepository.existsByKey("test")) {
         Scope scope1 = new Scope("test", "Test Scope", "This is a test scope");
-        Scope scope2 = new Scope("ship", "Ship Scope", "This is a ship scope");
         scopeRepository.save(scope1);
+      }
+      if (scopeRepository.existsByKey("ship")) {
+        Scope scope2 = new Scope("ship", "Ship Scope", "This is a ship scope");
         scopeRepository.save(scope2);
       }
 
+      Company companyForAdministrator;
+
       // Create and save Companies
-      if (companyRepository.count() == 0) {
+      if (!companyRepository.existsByName("Company A")) {
         Company company1 = new Company("Company A");
+        companyForAdministrator = companyRepository.save(company1);
+      } else {
+        companyForAdministrator = companyRepository.findByName("Company A").orElseThrow();
+      }
+
+      if (!companyRepository.existsByName("Company B")) {
         Company company2 = new Company("Company B");
-        companyRepository.saveAndFlush(company1);
-        companyRepository.saveAndFlush(company2);
+        companyRepository.save(company2);
       }
 
       // Create and save Administrators
-      if (administratorRepository.count() == 0) {
-        administratorService.addAdministrator(new InviteAdministratorRequest(
-                1L, "a_lund_01@hotmail.com", true, "Owner"
-        ));
+      String adminEmail = "a_lund_01@hotmail.com";
+      @SuppressWarnings("squid:S6437")
+      String encodedPassword = passwordEncoder.encode("Test12345678");
+      if (!administratorRepository.existsByUsernameOrEmail(adminEmail)) {
+        Administrator administrator = new Administrator(
+                adminEmail,
+                "AndersL01",
+                encodedPassword,
+                "Anders",
+                "Lund");
+        administrator.setRegistered(new Date());
+        administratorService.addAdministratorToCompany(companyForAdministrator.getId(),
+                administrator, AdministratorRole.OWNER
+        );
       }
     };
   }

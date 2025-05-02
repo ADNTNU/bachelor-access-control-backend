@@ -29,7 +29,9 @@ import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Service class for managing administrators.
@@ -82,29 +84,15 @@ public class AdministratorService {
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 
-  /**
-   * Creates a new Administrator.
-   * <p>
-   * Creates a new Administrator entity and saves it to the database.
-   * The password is encoded before saving using the PasswordEncoder Bean.
-   * If the username already exists, an IllegalArgumentException is thrown.
-   * </p>
-   *
-   * @param administrator the Administrator entity to be created
-   * @throws IllegalArgumentException if the username already exists
-   */
-  @Transactional
-  public Administrator createAdministrator(Administrator administrator) throws IllegalArgumentException {
-    // Check if the username already exists
-    if (administratorRepository.existsByUsername(administrator.getUsername())) {
-      throw new IllegalArgumentException("Username already exists");
-    }
 
-//    TODO: Split encoding logic to own method when used in multiple places
-    String encodedPassword = passwordEncoder.encode(administrator.getPassword());
-    administrator.setPassword(encodedPassword);
+  public Administrator getById(long adminId) {
+    return administratorRepository.findById(adminId)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+  }
 
-    return administratorRepository.save(administrator);
+  public Administrator getByUsernameOrEmail(String usernameOrEmail) {
+    return administratorRepository.findByUsernameOrEmail(usernameOrEmail)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
   }
 
   public List<AdministratorCompany> getAdministratorCompaniesByAdministratorIdsAndCompanyId(List<Long> administratorIds, long companyId) {
@@ -138,10 +126,12 @@ public class AdministratorService {
     @SuppressWarnings("squid:S6437")
     String encodedPassword = passwordEncoder.encode("temporaryPassword");
 
-    Administrator administrator = administratorRepository.findByUsername(inviteAdministratorRequest.getUsername()).orElse(
-            new Administrator(
-                    inviteAdministratorRequest.getUsername(),
+    String temporaryUUIDForUsername = UUID.randomUUID().toString();
 
+    Administrator administrator = administratorRepository.findByUsername(inviteAdministratorRequest.getEmail()).orElse(
+            new Administrator(
+                    inviteAdministratorRequest.getEmail(),
+                    temporaryUUIDForUsername,
                     encodedPassword, // Temporary password before user sets up the account
                     "temporaryFirstName", // Temporary first name before user sets up the account
                     "temporaryLastName" // Temporary last name before user sets up the account
@@ -161,7 +151,7 @@ public class AdministratorService {
     String inviteLink = String.format("%s/accept-invite?token=%s", frontendBaseUrl, encodedToken);
 
     sendGridService.sendInviteAdminEmail(
-            inviteAdministratorRequest.getUsername(),
+            inviteAdministratorRequest.getEmail(),
             company.getName(),
             inviteLink
     );
@@ -193,25 +183,20 @@ public class AdministratorService {
 
     passwordPolicyService.validatePassword(registerAndAcceptAdministratorInviteRequest.getPassword());
     String encodedPassword = passwordEncoder.encode(registerAndAcceptAdministratorInviteRequest.getPassword());
+    administrator.setUsername(registerAndAcceptAdministratorInviteRequest.getUsername());
     administrator.setPassword(encodedPassword);
     administrator.setFirstName(registerAndAcceptAdministratorInviteRequest.getFirstName());
     administrator.setLastName(registerAndAcceptAdministratorInviteRequest.getLastName());
-    administrator.setRegistered(true);
+    administrator.setRegistered(new Date());
 
     administratorRepository.save(administrator);
   }
 
   private AdministratorCompany getAdministratorCompanyFromInviteToken(String token) throws AdministratorCompanyNotFoundException, JwtException {
-    try {
-      Pair<String, String> idPair = jwtTokenProvider.verifyInviteTokenAndGetCompanyAndAdminId(token);
-      long companyId = Long.parseLong(idPair.getFirst());
-      long adminId = Long.parseLong(idPair.getSecond());
+      Pair<Long, Long> idPair = jwtTokenProvider.verifyInviteTokenAndGetCompanyAndAdminId(token);
 
-      return administratorCompanyRepository.findByAdministratorIdAndCompanyId(adminId, companyId)
+      return administratorCompanyRepository.findByAdministratorIdAndCompanyId(idPair.getSecond(), idPair.getFirst())
               .orElseThrow(() -> new AdministratorCompanyNotFoundException("AdministratorCompany not found"));
-    } catch (NumberFormatException e) {
-      throw new JwtException("Invalid token format", e);
-    }
   }
 
   @Transactional
@@ -236,23 +221,9 @@ public class AdministratorService {
   }
 
   @Transactional
-  public void addAdministrator(InviteAdministratorRequest inviteAdministratorRequest) {
-    Company company = companyService.getCompanyById(inviteAdministratorRequest.getCompanyId());
+  public void addAdministratorToCompany(long companyId, Administrator administrator, AdministratorRole role) {
+    Company company = companyService.getCompanyById(companyId);
 
-    @SuppressWarnings("squid:S6437")
-    String encodedPassword = passwordEncoder.encode("Test12345678");
-
-    Administrator administrator = administratorRepository.findByUsername(inviteAdministratorRequest.getUsername()).orElse(
-            new Administrator(
-                    inviteAdministratorRequest.getUsername(),
-
-                    encodedPassword, // Temporary password before user sets up the account
-                    "temporaryFirstName", // Temporary first name before user sets up the account
-                    "temporaryLastName" // Temporary last name before user sets up the account
-            )
-    );
-
-    AdministratorRole role = AdministratorRole.fromString(inviteAdministratorRequest.getRole());
     AdministratorCompany ac = administrator.addCompanyWithRole(
             company,
             role
@@ -261,10 +232,37 @@ public class AdministratorService {
     ac.setAccepted(true);
     ac.setEnabled(true);
 
-    administrator.setRegistered(true);
+    administrator.setRegistered(new Date());
 
     administratorRepository.save(administrator);
   }
+
+  public void requestPasswordReset(String email) throws UsernameNotFoundException {
+    Administrator administrator = getByUsernameOrEmail(email);
+
+    String token = jwtTokenProvider.generatePasswordResetToken(String.valueOf(administrator.getId()));
+    String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
+    String resetLink = String.format("%s/reset-password?token=%s", frontendBaseUrl, encodedToken);
+
+    sendGridService.sendPasswordResetEmail(
+            email,
+            resetLink,
+            administrator.getFirstName()
+    );
+  }
+
+  public void resetPassword(String token, String newPassword) {
+    String adminIdString = jwtTokenProvider.verifyPasswordResetTokenAndGetAdminId(token);
+    long adminId = Long.parseLong(adminIdString);
+
+    Administrator administrator = getById(adminId);
+    passwordPolicyService.validatePassword(newPassword);
+    String encodedPassword = passwordEncoder.encode(newPassword);
+    administrator.setPassword(encodedPassword);
+
+    administratorRepository.save(administrator);
+  }
+
 
 //  TODO: Add methods for creating, updating, and deleting administrators
 }

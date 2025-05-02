@@ -30,14 +30,13 @@ public class CustomUserDetailsService implements UserDetailsService {
    *   This method retrieves user details from the database based on the provided username.
    *   If the user is not found, it throws a UsernameNotFoundException.
    *   </p>
-   * @param username the username identifying the user whose data is required.
    * @return UserDetails object containing user information.
    * @throws UsernameNotFoundException if the user is not found.
    */
   @Override
-  public UserDetails loadUserByUsername(String username) {
+  public UserDetails loadUserByUsername(String usernameOrEmail) {
     return new CustomUserDetails(
-            administratorRepository.findWithAdministratorCompaniesByUsername(username)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username)));
+            administratorRepository.findWithAdministratorCompaniesByUsernameOrEmail(usernameOrEmail)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + usernameOrEmail)), usernameOrEmail);
   }
 }

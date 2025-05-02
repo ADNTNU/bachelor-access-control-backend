@@ -5,7 +5,6 @@ import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.CreateApiKeyRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.DeleteApiKeysRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.requests.PaginatedCRUDListRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.UpdateApiKeyRequest;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.company.CompanyService;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.ErrorResponse;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.ApiKeyNotFoundException;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.CompanyNotFoundException;

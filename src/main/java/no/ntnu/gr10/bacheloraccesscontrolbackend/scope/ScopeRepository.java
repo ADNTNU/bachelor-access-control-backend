@@ -26,4 +26,6 @@ public interface ScopeRepository extends JpaRepository<Scope, Long> {
   List<ScopeSimpleDto> findAllScopeSimpleDtos();
 
   Optional<Scope> findByKey(String scopeKey);
+
+  boolean existsByKey(String key);
 }

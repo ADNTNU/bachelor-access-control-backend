@@ -28,7 +28,7 @@ public class SendGridService {
     this.sendGrid = new SendGrid(apiKey);
   }
 
-  public void sendResetPasswordEmail(String to, String resetUrl, String firstName) throws SendMailException {
+  public void sendPasswordResetEmail(String to, String resetUrl, String firstName) throws SendMailException {
     String expirationMinutes = String.valueOf(PASSWORD_RESET_TOKEN_EXPIRATION_MS / 60000);
     Mail mail = buildDynamicTemplateMail(to, resetPasswordTemplateId, Map.of(
             "firstName", firstName,

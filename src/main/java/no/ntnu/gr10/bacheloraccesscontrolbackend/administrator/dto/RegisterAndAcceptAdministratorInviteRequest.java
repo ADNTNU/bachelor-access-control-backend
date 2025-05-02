@@ -10,6 +10,10 @@ public class RegisterAndAcceptAdministratorInviteRequest {
 
   @NotNull
   @NotBlank
+  private String username;
+
+  @NotNull
+  @NotBlank
   private String password;
 
   @NotNull
@@ -24,8 +28,9 @@ public class RegisterAndAcceptAdministratorInviteRequest {
     // Default constructor for deserialization
   }
 
-  public RegisterAndAcceptAdministratorInviteRequest(String inviteToken, String password, String firstName, String lastName) {
+  public RegisterAndAcceptAdministratorInviteRequest(String inviteToken, String username, String password, String firstName, String lastName) {
     this.inviteToken = inviteToken;
+    this.username = username;
     this.password = password;
     this.firstName = firstName;
     this.lastName = lastName;
@@ -37,6 +42,14 @@ public class RegisterAndAcceptAdministratorInviteRequest {
 
   public void setInviteToken(String token) {
     this.inviteToken = token;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
   }
 
   public String getPassword() {

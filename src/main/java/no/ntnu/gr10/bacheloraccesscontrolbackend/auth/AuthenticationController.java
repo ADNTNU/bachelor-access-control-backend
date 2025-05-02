@@ -1,11 +1,13 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.auth;
 
+import io.jsonwebtoken.security.InvalidKeyException;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.LoginRequest;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.RegisterRequest;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.AuthenticationResponse;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.*;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.ErrorResponse;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.SuccessResponse;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.security.JwtTokenProvider;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.security.CustomUserDetails;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorService;
@@ -18,7 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.logging.Logger;
@@ -41,8 +43,6 @@ public class AuthenticationController {
   private final AuthenticationManager authenticationManager;
   private final JwtTokenProvider tokenProvider;
   private final AdministratorService administratorService;
-  private final PasswordPolicyService passwordPolicyService;
-  private final PasswordEncoder passwordEncoder;
 
   /**
    * Constructor for AuthenticationController.
@@ -54,12 +54,10 @@ public class AuthenticationController {
   @Autowired
   public AuthenticationController(AuthenticationManager authenticationManager,
                                   JwtTokenProvider tokenProvider,
-                                  AdministratorService administratorService, PasswordPolicyService passwordPolicyService, PasswordEncoder passwordEncoder) {
+                                  AdministratorService administratorService) {
     this.authenticationManager = authenticationManager;
     this.tokenProvider = tokenProvider;
     this.administratorService = administratorService;
-    this.passwordPolicyService = passwordPolicyService;
-    this.passwordEncoder = passwordEncoder;
   }
 
   /**
@@ -77,11 +75,14 @@ public class AuthenticationController {
     try {
       Authentication authentication = authenticationManager.authenticate(
           new UsernamePasswordAuthenticationToken(
-              loginRequest.username(),
-              loginRequest.password()
+              loginRequest.getUsernameOrEmail(),
+              loginRequest.getPassword()
           )
       );
-      AuthenticationResponse response = authenticateAndGenerateResponse(authentication);
+
+      SecurityContextHolder.getContext().setAuthentication(authentication);
+
+      AuthenticationResponse response = generateAuthenticationResponse(authentication);
 
       return ResponseEntity.ok(response);
     } catch (BadCredentialsException | UsernameNotFoundException e) {
@@ -93,60 +94,87 @@ public class AuthenticationController {
     }
   }
 
+  @PostMapping("/logout")
+  public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+    if (authentication != null){
+      new SecurityContextLogoutHandler().logout(request, response, authentication);
+    }
+    return ResponseEntity.ok().build();
+  }
+
   /**
-   * Temporary method to register a new administrator.
+   * Requests to refresh the access token using the refresh token.
+   * <p>
+   *   This method handles the token refresh request by validating the provided refresh token.
+   *   If the token is valid, it generates a new access token and returns it in the response.
+   *   If the token is invalid, it returns an unauthorized response.
+   * </p>
+   *
    */
-  @PostMapping("/register")
-  public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+  @PostMapping("/refresh-token")
+  public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
     try {
-      if (administratorService.existsByUsername(registerRequest.getUsername())) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse("Username already exists"));
-      }
+      String adminIdString = tokenProvider.verifyAuthTokenAndGetAdminId(refreshTokenRequest.getRefreshToken());
+      long adminId = Long.parseLong(adminIdString);
+      Administrator admin = administratorService.getById(adminId);
+      CustomUserDetails userDetails = new CustomUserDetails(admin, admin.getEmail());
 
-      passwordPolicyService.validatePassword(registerRequest.getPassword());
-      passwordEncoder.encode(registerRequest.getPassword());
-
-      Administrator admin = new Administrator(
-              registerRequest.getUsername(),
-              registerRequest.getPassword(),
-              registerRequest.getFirstName(),
-              registerRequest.getLastName()
+      Authentication authentication = new UsernamePasswordAuthenticationToken(
+              userDetails,
+              null,
+              userDetails.getAuthorities()
       );
+      SecurityContextHolder.getContext().setAuthentication(authentication);
 
-      admin.setRegistered(true);
+      AuthenticationResponse response = generateAuthenticationResponse(authentication);
 
-      administratorService.createAdministrator(admin);
-
-      Authentication authentication = authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(
-                      registerRequest.getUsername(),
-                      registerRequest.getPassword()
-              )
-      );
-      AuthenticationResponse response = authenticateAndGenerateResponse(authentication);
-
-      return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Invalid registration data"));
-    } catch (PasswordPolicyService.WeakPasswordException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Invalid password"));
+      return ResponseEntity.ok(response);
+    } catch (InvalidKeyException e) {
+      logger.severe("Invalid refresh token: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Invalid refresh token"));
     } catch (Exception e) {
-      logger.severe("Error during registration: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during registration"));
+      logger.severe("Error during token refresh: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during token refresh"));
     }
   }
 
-  private AuthenticationResponse authenticateAndGenerateResponse(Authentication authentication) {
-    SecurityContextHolder.getContext().setAuthentication(authentication);
-    String jwt = tokenProvider.generateAuthToken(authentication);
+  @PostMapping("/request-password-reset")
+  public ResponseEntity<?> requestPasswordReset(@RequestBody RequestPasswordResetRequest request) {
+    try {
+      administratorService.requestPasswordReset(request.getEmail());
+      return ResponseEntity.ok(new SuccessResponse("Password reset request sent successfully"));
+    } catch (UsernameNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("User not found"));
+    } catch (Exception e) {
+      logger.severe("Error during password reset request: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during password reset request"));
+    }
+  }
+
+  @PostMapping("/reset-password")
+  public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
+    try {
+      administratorService.resetPassword(request.getToken(), request.getNewPassword());
+      return ResponseEntity.ok(new SuccessResponse("Password reset successfully"));
+    } catch (UsernameNotFoundException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("User not found"));
+    } catch (InvalidKeyException e) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Invalid token"));
+    } catch (Exception e) {
+      logger.severe("Error during password reset: " + e.getMessage());
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during password reset"));
+    }
+  }
+
+  private AuthenticationResponse generateAuthenticationResponse(Authentication authentication) {
+    String accessToken = tokenProvider.generateAuthToken(authentication);
+    String refreshToken = tokenProvider.generateRefreshToken(authentication);
     CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
     return new AuthenticationResponse(
-            jwt,
-            userDetails.getId(),
-            userDetails.getUsername(),
-            userDetails.getAuthorities(),
-            userDetails.getName()
+            accessToken,
+            refreshToken,
+            userDetails
     );
   }
 }
