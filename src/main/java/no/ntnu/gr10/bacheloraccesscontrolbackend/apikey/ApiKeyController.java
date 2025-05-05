@@ -71,7 +71,7 @@ public class ApiKeyController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
               .body(new ErrorResponse("Company not found"));
     } catch (ScopeNotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
               .body(new ErrorResponse("Scope not found"));
     } catch (Exception e) {
       logger.severe("Error creating API key: " + e.getMessage());

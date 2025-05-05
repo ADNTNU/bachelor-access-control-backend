@@ -27,13 +27,9 @@ public class DatabaseSeeder {
                                         CompanyRepository companyRepository, AdministratorService administratorService, PasswordEncoder passwordEncoder) {
     return args -> {
       // Create and save Scopes
-      if (scopeRepository.existsByKey("test")) {
-        Scope scope1 = new Scope("test", "Test Scope", "This is a test scope");
+      if (!scopeRepository.existsByKey("fishery-activity")) {
+        Scope scope1 = new Scope("fishery-activity", "Fishery activity", "Allows reading fishery activity data");
         scopeRepository.save(scope1);
-      }
-      if (scopeRepository.existsByKey("ship")) {
-        Scope scope2 = new Scope("ship", "Ship Scope", "This is a ship scope");
-        scopeRepository.save(scope2);
       }
 
       Company companyForAdministrator;

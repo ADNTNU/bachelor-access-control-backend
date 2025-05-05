@@ -43,6 +43,7 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 3306
           DB_NAME: dev
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
 
       - name: Run Tests
         run: mvn test
@@ -52,3 +53,4 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 3306
           DB_NAME: dev
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
