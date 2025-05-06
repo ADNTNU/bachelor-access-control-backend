@@ -77,6 +77,8 @@ public class SecurityConfigurer {
             .cors(Customizer.withDefaults())
             .authorizeHttpRequests(authorize -> authorize
                     .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/administrator/register-from-invite").permitAll()
+                    .requestMatchers("/administrator/accept-invite").permitAll()
                     .anyRequest().authenticated())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

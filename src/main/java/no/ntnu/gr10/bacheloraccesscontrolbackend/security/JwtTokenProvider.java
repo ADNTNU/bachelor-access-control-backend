@@ -38,6 +38,7 @@ public class JwtTokenProvider {
   private static final String INVITE_TOKEN_TYPE = "invite";
   private static final String INVITE_COMPANY_ID_CLAIM = "companyId";
   private static final String INVITE_ADMIN_REGISTERED_CLAIM = "adminRegistered";
+  private static final String INVITE_COMPANY_NAME_CLAIM = "companyName";
 
   private static final String PASSWORD_RESET_TOKEN_TYPE = "passwordReset";
   public static final int PASSWORD_RESET_TOKEN_EXPIRATION_MS = 1800000; // 30 minutes
@@ -143,10 +144,10 @@ public class JwtTokenProvider {
    * @return the generated invite token
    * @throws InvalidKeyException if the signing key is invalid
    */
-  public String generateInviteToken(String adminId, String companyId, boolean registered) throws InvalidKeyException {
+  public String generateInviteToken(String adminId, String companyId, boolean registered, String companyName) throws InvalidKeyException {
     Date now = new Date();
     // 24h
-    long expirationMs = 1800000; // 30 minutes
+    long expirationMs = 28800000L;
     Date expirationDate = new Date(now.getTime() + expirationMs);
 
     return Jwts.builder()
@@ -154,6 +155,7 @@ public class JwtTokenProvider {
             .claim(INVITE_COMPANY_ID_CLAIM, companyId)
             .claim(INVITE_ADMIN_REGISTERED_CLAIM, registered)
             .claim(TOKEN_TYPE_CLAIM, INVITE_TOKEN_TYPE)
+            .claim(INVITE_COMPANY_NAME_CLAIM, companyName)
             .issuedAt(now)
             .expiration(expirationDate)
             .signWith(getSigningKey())

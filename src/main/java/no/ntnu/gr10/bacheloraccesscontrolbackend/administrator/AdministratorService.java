@@ -146,7 +146,7 @@ public class AdministratorService {
 
     Administrator newAdmin = administratorRepository.save(administrator);
 
-    String token = jwtTokenProvider.generateInviteToken(String.valueOf(newAdmin.getId()), String.valueOf(company.getId()), administrator.isRegistered());
+    String token = jwtTokenProvider.generateInviteToken(String.valueOf(newAdmin.getId()), String.valueOf(company.getId()), administrator.isRegistered(), company.getName());
     String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
     String inviteLink = String.format("%s/accept-invite?token=%s", frontendBaseUrl, encodedToken);
 

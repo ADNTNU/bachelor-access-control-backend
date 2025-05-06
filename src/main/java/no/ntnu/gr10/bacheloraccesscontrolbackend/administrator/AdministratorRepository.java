@@ -26,7 +26,7 @@ public interface AdministratorRepository extends JpaRepository<Administrator, Lo
   @Query("SELECT COUNT(a) > 0 FROM Administrator a WHERE a.username = :input OR a.email = :input")
   boolean existsByUsernameOrEmail(@Param("input") String input);
 
-  @Query("SELECT a FROM Administrator a WHERE a.username = :input OR a.email = :input")
+  @Query("SELECT a FROM Administrator a WHERE a.email = :input OR a.username = :input")
   Optional<Administrator> findByUsernameOrEmail(@Param("input") String input);
 
 }

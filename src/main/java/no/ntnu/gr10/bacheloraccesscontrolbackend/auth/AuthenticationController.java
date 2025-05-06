@@ -63,21 +63,21 @@ public class AuthenticationController {
   /**
    * Authenticates the user and returns a JWT token if successful.
    * <p>
-   *   This method handles the login request by validating the provided username and password.
-   *   If the credentials are valid, it generates a JWT token and returns it in the response.
-   *   If the credentials are invalid, it returns an unauthorized response.
-   *   </p>
+   * This method handles the login request by validating the provided username and password.
+   * If the credentials are valid, it generates a JWT token and returns it in the response.
+   * If the credentials are invalid, it returns an unauthorized response.
+   * </p>
    *
-   *   @param loginRequest the login request containing username and password
+   * @param loginRequest the login request containing username and password
    */
   @PostMapping("/login")
   public ResponseEntity<?> authenticate(@RequestBody LoginRequest loginRequest) {
     try {
       Authentication authentication = authenticationManager.authenticate(
-          new UsernamePasswordAuthenticationToken(
-              loginRequest.getUsernameOrEmail(),
-              loginRequest.getPassword()
-          )
+              new UsernamePasswordAuthenticationToken(
+                      loginRequest.getUsernameOrEmail(),
+                      loginRequest.getPassword()
+              )
       );
 
       SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -96,7 +96,7 @@ public class AuthenticationController {
 
   @PostMapping("/logout")
   public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-    if (authentication != null){
+    if (authentication != null) {
       new SecurityContextLogoutHandler().logout(request, response, authentication);
     }
     return ResponseEntity.ok().build();
@@ -105,11 +105,10 @@ public class AuthenticationController {
   /**
    * Requests to refresh the access token using the refresh token.
    * <p>
-   *   This method handles the token refresh request by validating the provided refresh token.
-   *   If the token is valid, it generates a new access token and returns it in the response.
-   *   If the token is invalid, it returns an unauthorized response.
+   * This method handles the token refresh request by validating the provided refresh token.
+   * If the token is valid, it generates a new access token and returns it in the response.
+   * If the token is invalid, it returns an unauthorized response.
    * </p>
-   *
    */
   @PostMapping("/refresh-token")
   public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
@@ -138,13 +137,14 @@ public class AuthenticationController {
     }
   }
 
+  @SuppressWarnings("java:S6863")
   @PostMapping("/request-password-reset")
   public ResponseEntity<?> requestPasswordReset(@RequestBody RequestPasswordResetRequest request) {
     try {
       administratorService.requestPasswordReset(request.getEmail());
       return ResponseEntity.ok(new SuccessResponse("Password reset request sent successfully"));
     } catch (UsernameNotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("User not found"));
+      return ResponseEntity.ok(new SuccessResponse("Password reset request sent successfully"));
     } catch (Exception e) {
       logger.severe("Error during password reset request: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during password reset request"));
@@ -160,6 +160,8 @@ public class AuthenticationController {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("User not found"));
     } catch (InvalidKeyException e) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Invalid token"));
+    } catch (PasswordPolicyService.WeakPasswordException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Invalid password"));
     } catch (Exception e) {
       logger.severe("Error during password reset: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during password reset"));
