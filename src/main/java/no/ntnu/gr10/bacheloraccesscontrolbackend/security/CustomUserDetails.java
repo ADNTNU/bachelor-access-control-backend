@@ -1,15 +1,14 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -24,21 +23,26 @@ import java.util.stream.Collectors;
 public class CustomUserDetails implements UserDetails {
 
   private final long id;
+  private final String loginIdentifier;
   private final String username;
+  private final String email;
   private final String password;
   private final boolean enabled;
   private final List<GrantedAuthority> authorities;
   private final String name;
   private final Set<Long> companyIds;
+  private final Date registered;
 
   /**
    * Constructor that initializes the user details from an Administrator object.
    *
    * @param administrator the Administrator object containing user details
    */
-  public CustomUserDetails(Administrator administrator) {
+  public CustomUserDetails(Administrator administrator, String loginIdentifier) {
     this.id = administrator.getId();
+    this.loginIdentifier = loginIdentifier;
     this.username = administrator.getUsername();
+    this.email = administrator.getEmail();
     this.password = administrator.getPassword();
     this.enabled = administrator.isRegistered();
     this.name = String.format("%s %s", administrator.getFirstName(), administrator.getLastName());
@@ -47,6 +51,7 @@ public class CustomUserDetails implements UserDetails {
             .map(Company::getId)
             .collect(Collectors.toSet());
     this.authorities = new LinkedList<>();
+    this.registered = administrator.getRegistered();
   }
 
   /**
@@ -59,8 +64,9 @@ public class CustomUserDetails implements UserDetails {
   }
 
   @Override
+  @SuppressWarnings("java:S4275")
   public String getUsername() {
-    return username;
+    return loginIdentifier;
   }
 
   @Override
@@ -78,11 +84,23 @@ public class CustomUserDetails implements UserDetails {
     return authorities;
   }
 
+  public String getActualUsername() {
+    return username;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
   public String getName() {
     return name;
   }
 
   public Set<Long> getCompanyIds() {
     return companyIds;
+  }
+
+  public @NotNull @NotBlank Date getRegistered() {
+    return registered;
   }
 }

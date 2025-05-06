@@ -30,4 +30,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     @EntityGraph(attributePaths = {"administratorCompanies"})
     Optional<Company> findByName(String companyA);
+
+    boolean existsByName(String companyA);
 }

@@ -72,40 +72,13 @@ public class ApiKey {
    * @param description A description of the API key.
    *
    */
-  public ApiKey(boolean enabled, Company company, String name, String description) {
+  public ApiKey(boolean enabled, Company company, String name, String description, String clientId, String clientSecret) {
     setEnabled(enabled);
     setCompany(company);
     setName(name);
     setDescription(description);
-  }
-
-  /**
-   * Ensures that the clientId and clientSecret are generated before persisting the entity.
-   */
-  @PrePersist
-  private void prePersist() {
-    if (this.clientId == null) this.clientId = generateClientId();
-    if (this.clientSecret == null) this.clientSecret = generateClientSecret();
-  }
-
-  private String generateClientId() {
-//    TODO: Consider using a more secure method for generating client IDs
-    return UUID.randomUUID().toString();
-  }
-
-  private String generateClientSecret() {
-//    TODO: Consider using a more secure method for generating client IDs
-    return UUID.randomUUID().toString().replace("-", "");
-  }
-
-  /**
-   * Generates a new client secret for the API key.
-   * <p>
-   * This method generates a new client secret and assigns it to the API key.
-   * </p>
-   */
-  public void rerollClientSecret() {
-    this.clientSecret = generateClientSecret();
+    setClientId(clientId);
+    setClientSecret(clientSecret);
   }
 
   /**
@@ -141,11 +114,45 @@ public class ApiKey {
   }
 
   /**
+   * Sets the client ID of the API key.
+   * @param clientId The client ID to set.
+   * @throws IllegalArgumentException if the client ID is null or empty.
+   */
+  public void setClientId(String clientId) {
+    if (clientId == null || clientId.isEmpty()) {
+      throw new IllegalArgumentException("Client ID cannot be null or empty");
+    }
+
+    if (clientId.length() > 255) {
+      throw new IllegalArgumentException("Client ID cannot exceed 255 characters");
+    }
+
+    this.clientId = clientId;
+  }
+
+  /**
    * Gets the client secret of the API key.
    * @return The client secret of the API key.
    */
   public String getClientSecret() {
     return clientSecret;
+  }
+
+  /**
+   * Sets the client secret of the API key.
+   * @param clientSecret The client secret to set.
+   * @throws IllegalArgumentException if the client secret is null or empty.
+   */
+  public void setClientSecret(String clientSecret) {
+    if (clientSecret == null || clientSecret.isEmpty()) {
+      throw new IllegalArgumentException("Client secret cannot be null or empty");
+    }
+
+    if (clientSecret.length() > 255) {
+      throw new IllegalArgumentException("Client secret cannot exceed 255 characters");
+    }
+
+    this.clientSecret = clientSecret;
   }
 
   /**

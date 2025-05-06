@@ -26,15 +26,20 @@ public class JwtTokenProvider {
   @Value("${jwt_secret}")
   private String secretKey;
 
+  private static final int ACCESS_TOKEN_EXPIRATION_MS = 900000; // 15 minutes
+  private static final int REFRESH_TOKEN_EXPIRATION_MS = 604800000; // 7 days
+
   private static final String USERNAME_CLAIM = "username";
+  private static final String EMAIL_CLAIM = "email";
   private static final String ROLES_CLAIM = "roles";
 
-  private static final String INVITE_TOKEN_SUBJECT = "invite";
-  private static final String COMPANY_ID_CLAIM = "companyId";
-  private static final String ADMIN_ID_CLAIM = "adminId";
-  private static final String ADMIN_REGISTERED_CLAIM = "adminRegistered";
+  private static final String TOKEN_TYPE_CLAIM = "tokenType";
 
-  private static final String PASSWORD_RESET_TOKEN_SUBJECT = "passwordReset";
+  private static final String INVITE_TOKEN_TYPE = "invite";
+  private static final String INVITE_COMPANY_ID_CLAIM = "companyId";
+  private static final String INVITE_ADMIN_REGISTERED_CLAIM = "adminRegistered";
+
+  private static final String PASSWORD_RESET_TOKEN_TYPE = "passwordReset";
   public static final int PASSWORD_RESET_TOKEN_EXPIRATION_MS = 1800000; // 30 minutes
 
   /**
@@ -52,16 +57,40 @@ public class JwtTokenProvider {
     CustomUserDetails admin = (CustomUserDetails) authentication.getPrincipal();
 
     Date now = new Date();
-    // 24h
-    long expirationMs = 86400000; // 24 hours
-    Date expirationDate = new Date(now.getTime() + expirationMs);
+    Date expirationDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION_MS);
 
     return Jwts.builder()
             .subject(String.valueOf(admin.getId()))
             .issuedAt(now)
             .expiration(expirationDate)
             .claim(USERNAME_CLAIM, admin.getUsername())
+            .claim(EMAIL_CLAIM, admin.getEmail())
             .claim(ROLES_CLAIM, admin.getAuthorities())
+            .signWith(getSigningKey())
+            .compact();
+  }
+
+  /**
+   * Generates a refresh token for the given authentication.
+   * <p>
+   *   This method creates a JWT token using the provided authentication information.
+   *   The token includes the adminId, issued date, and expiration date.
+   * </p>
+   *
+   * @param authentication the authentication object containing user details
+   * @return the generated JWT token
+   * @throws InvalidKeyException if the signing key is invalid
+   */
+  public String generateRefreshToken(Authentication authentication) throws InvalidKeyException {
+    CustomUserDetails admin = (CustomUserDetails) authentication.getPrincipal();
+
+    Date now = new Date();
+    Date expirationDate = new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION_MS);
+
+    return Jwts.builder()
+            .subject(String.valueOf(admin.getId()))
+            .issuedAt(now)
+            .expiration(expirationDate)
             .signWith(getSigningKey())
             .compact();
   }
@@ -77,7 +106,7 @@ public class JwtTokenProvider {
    * @throws JwtException             if the token is invalid or expired
    * @throws IllegalArgumentException if the token is null or empty
    */
-  public String verifyAuthTokenAndGetUsername(String token) throws JwtException {
+  public String verifyAccessTokenAndGetUsername(String token) throws JwtException {
     Claims claims = verifyTokenAndGetClaims(token);
 
     return claims
@@ -85,7 +114,24 @@ public class JwtTokenProvider {
   }
 
   /**
-   * Generates an invite token for the given admin and company.
+   * Verifies the given JWT token and retrieves the admin ID from it.
+   * <p>
+   * This method checks the validity of the provided JWT token and extracts the admin ID from it.
+   * </p>
+   *
+   * @param token the JWT token to verify
+   * @return the admin ID extracted from the token
+   * @throws JwtException             if the token is invalid or expired
+   */
+  public String verifyAuthTokenAndGetAdminId(String token) throws JwtException {
+    Claims claims = verifyTokenAndGetClaims(token);
+
+    return claims
+            .getSubject();
+  }
+
+  /**
+   * Generates an invitation token for the given admin and company.
    * <p>
    * This method creates a JWT token for inviting an admin to a company.
    * The token includes the company ID, admin ID and registration status.
@@ -104,10 +150,10 @@ public class JwtTokenProvider {
     Date expirationDate = new Date(now.getTime() + expirationMs);
 
     return Jwts.builder()
-            .subject(INVITE_TOKEN_SUBJECT)
-            .claim(COMPANY_ID_CLAIM, companyId)
-            .claim(ADMIN_ID_CLAIM, adminId)
-            .claim(ADMIN_REGISTERED_CLAIM, registered)
+            .subject(adminId)
+            .claim(INVITE_COMPANY_ID_CLAIM, companyId)
+            .claim(INVITE_ADMIN_REGISTERED_CLAIM, registered)
+            .claim(TOKEN_TYPE_CLAIM, INVITE_TOKEN_TYPE)
             .issuedAt(now)
             .expiration(expirationDate)
             .signWith(getSigningKey())
@@ -125,19 +171,28 @@ public class JwtTokenProvider {
    * @throws JwtException             if the token is invalid or expired
    * @throws IllegalArgumentException if the token is null or empty
    */
-  public Pair<String, String> verifyInviteTokenAndGetCompanyAndAdminId(String token) throws JwtException {
-    Claims claims = verifyTokenAndGetClaims(token);
+  public Pair<Long, Long> verifyInviteTokenAndGetCompanyAndAdminId(String token) throws JwtException {
 
-    if (!claims.getSubject().equals(INVITE_TOKEN_SUBJECT)) {
-      throw new JwtException("Invalid token subject");
+    try {
+      Claims claims = verifyTokenAndGetClaims(token);
+
+      if (!claims.get(TOKEN_TYPE_CLAIM, String.class).equals(INVITE_TOKEN_TYPE)) {
+        throw new JwtException("Invalid token subject");
+      }
+
+      String companyIdString = claims
+              .get(INVITE_COMPANY_ID_CLAIM, String.class);
+      String adminIdString = claims
+              .getSubject();
+
+      long companyId = Long.parseLong(companyIdString);
+      long adminId = Long.parseLong(adminIdString);
+
+      return Pair.of(companyId, adminId);
+
+    } catch (NumberFormatException e) {
+      throw new JwtException("Invalid token format", e);
     }
-
-    String companyId = claims
-            .get(COMPANY_ID_CLAIM, String.class);
-    String adminId = claims
-            .get(ADMIN_ID_CLAIM, String.class);
-
-    return Pair.of(companyId, adminId);
   }
 
   /**
@@ -156,12 +211,34 @@ public class JwtTokenProvider {
     Date expirationDate = new Date(now.getTime() + PASSWORD_RESET_TOKEN_EXPIRATION_MS);
 
     return Jwts.builder()
-            .subject(PASSWORD_RESET_TOKEN_SUBJECT)
-            .claim(ADMIN_ID_CLAIM, adminId)
+            .subject(adminId)
+            .claim(TOKEN_TYPE_CLAIM, PASSWORD_RESET_TOKEN_TYPE)
             .issuedAt(now)
             .expiration(expirationDate)
             .signWith(getSigningKey())
             .compact();
+  }
+
+  /**
+   * Verifies the given password reset token and retrieves the admin ID from it.
+   * <p>
+   * This method checks the validity of the provided password reset token and extracts the admin ID from it.
+   * </p>
+   *
+   * @param token the password reset token to verify
+   * @return the admin ID extracted from the token
+   * @throws JwtException             if the token is invalid or expired
+   * @throws IllegalArgumentException if the token is null or empty
+   */
+  public String verifyPasswordResetTokenAndGetAdminId(String token) throws JwtException {
+    Claims claims = verifyTokenAndGetClaims(token);
+
+    if (!claims.get(TOKEN_TYPE_CLAIM, String.class).equals(PASSWORD_RESET_TOKEN_TYPE)) {
+      throw new JwtException("Invalid token type");
+    }
+
+    return claims
+            .getSubject();
   }
 
   private Claims verifyTokenAndGetClaims(String token) throws JwtException {

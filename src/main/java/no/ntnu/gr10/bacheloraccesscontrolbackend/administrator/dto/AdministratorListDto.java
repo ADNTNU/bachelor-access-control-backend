@@ -8,6 +8,7 @@ public class AdministratorListDto {
   private final boolean enabled;
   private final boolean accepted;
   private final String username;
+  private final String email;
   private final String name;
 
   public AdministratorListDto(AdministratorCompany administratorCompany) {
@@ -16,6 +17,7 @@ public class AdministratorListDto {
     this.enabled = administratorCompany.isEnabled();
     this.accepted = administratorCompany.isAccepted();
     this.username = administrator.getUsername();
+    this.email = administrator.getEmail();
     this.name = administrator.getFirstName() + " " + administrator.getLastName();
   }
 
@@ -33,6 +35,10 @@ public class AdministratorListDto {
 
   public String getUsername() {
     return username;
+  }
+
+  public String getEmail() {
+    return email;
   }
 
   public String getName() {

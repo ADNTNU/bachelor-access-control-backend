@@ -13,7 +13,7 @@ public class InviteAdministratorRequest {
   @NotBlank
   @NotNull
   @Email
-  private String username;
+  private String email;
 
   @NotBlank
   @NotNull
@@ -27,9 +27,9 @@ public class InviteAdministratorRequest {
     // Default constructor for deserialization
   }
 
-  public InviteAdministratorRequest(Long companyId, String username, Boolean enabled, String role) {
+  public InviteAdministratorRequest(Long companyId, String email, Boolean enabled, String role) {
     this.companyId = companyId;
-    this.username = username;
+    this.email = email;
     this.enabled = enabled;
     this.role = role;
   }
@@ -42,12 +42,12 @@ public class InviteAdministratorRequest {
     this.companyId = companyId;
   }
 
-  public String getUsername() {
-    return username;
+  public String getEmail() {
+    return email;
   }
 
-  public void setUsername(String username) {
-    this.username = username;
+  public void setEmail(String email) {
+    this.email = email;
   }
 
   public Boolean getEnabled() {

@@ -4,10 +4,7 @@ import jakarta.persistence.*;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represents an administrator entity.
@@ -27,7 +24,10 @@ public class Administrator {
   private Long id;
 
   @Column(nullable = false)
-  private boolean registered = false;
+  private Date registered = null;
+
+  @Column(unique = true, nullable = false)
+  private String email;
 
   @Column(unique = true, nullable = false)
   private String username;
@@ -55,7 +55,8 @@ public class Administrator {
    * @param username The username of the administrator.
    * @param password The password of the administrator.
    */
-  public Administrator(String username, String password, String firstName, String lastName) {
+  public Administrator(String email, String username, String password, String firstName, String lastName) {
+    setEmail(email);
     setUsername(username);
     setPassword(password);
     setFirstName(firstName);
@@ -77,16 +78,54 @@ public class Administrator {
    * @return true if the administrator is registered, false otherwise.
    */
   public boolean isRegistered() {
+    return registered != null;
+  }
+
+  /**
+   * Get the date of registration.
+   *
+   * @return The registered date of the administrator.
+   */
+  public Date getRegistered() {
     return registered;
   }
 
   /**
-   * Set whether the administrator is registered or not.
+   * Set the date of registration.
    *
-   * @param registered The registered status to set.
+   * @param registered The registered date to set.
    */
-  public void setRegistered(boolean registered) {
+  public void setRegistered(Date registered) {
     this.registered = registered;
+  }
+
+  /**
+   * Gets the email of the administrator.
+   *
+   * @return The email of the administrator.
+   */
+  public String getEmail() {
+    return email;
+  }
+
+  /**
+   * Set the email of the administrator.
+   *
+   * @param email The email to set.
+   */
+  public void setEmail(String email) throws IllegalArgumentException {
+    if (email == null || email.isEmpty()) {
+      throw new IllegalArgumentException("Email cannot be null or empty");
+    }
+    if (email.length() > 254) {
+      throw new IllegalArgumentException("Email cannot exceed 254 characters");
+    }
+
+    if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+      throw new IllegalArgumentException("Email is not valid");
+    }
+
+    this.email = email;
   }
 
   /**
@@ -266,4 +305,5 @@ public class Administrator {
 
     return link;
   }
+
 }

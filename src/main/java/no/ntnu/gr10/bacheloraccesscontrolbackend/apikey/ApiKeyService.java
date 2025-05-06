@@ -2,7 +2,6 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.apikey;
 
 import jakarta.transaction.Transactional;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.DeleteApiKeysRequest;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.*;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.CompanyService;
@@ -18,9 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -35,12 +36,14 @@ public class ApiKeyService {
   final ApiKeyRepository apiKeyRepository;
   private final CompanyService companyService;
   private final ScopeService scopeService;
+  private final PasswordEncoder passwordEncoder;
 
   @Autowired
-  public ApiKeyService(ApiKeyRepository apiKeyRepository, CompanyService companyService, ScopeService scopeService) {
+  public ApiKeyService(ApiKeyRepository apiKeyRepository, CompanyService companyService, ScopeService scopeService, PasswordEncoder passwordEncoder) {
     this.apiKeyRepository = apiKeyRepository;
     this.companyService = companyService;
     this.scopeService = scopeService;
+    this.passwordEncoder = passwordEncoder;
   }
 
   /**
@@ -93,11 +96,17 @@ public class ApiKeyService {
             .map(scopeService::getScopeByScopeKey)
             .toList();
 
+    String clientId = generateUUID();
+    String clientSecret = generateUUID();
+    String encodedClientSecret = passwordEncoder.encode(clientSecret);
+
     ApiKey apiKey = new ApiKey(
             createApiKeyRequest.getEnabled(),
             company,
             createApiKeyRequest.getName(),
-            createApiKeyRequest.getDescription()
+            createApiKeyRequest.getDescription(),
+            clientId,
+            encodedClientSecret
     );
 
     apiKey.setScopes(scopes);
@@ -106,9 +115,13 @@ public class ApiKeyService {
 
     return new CreateApiKeyResponse(
             apiKey.getId(),
-            apiKey.getClientId(),
-            apiKey.getClientSecret()
+            clientId,
+            clientSecret
     );
+  }
+
+  private String generateUUID() {
+    return UUID.randomUUID().toString();
   }
 
   @Transactional
