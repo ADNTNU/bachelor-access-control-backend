@@ -98,7 +98,7 @@ public class AdministratorController {
       return ResponseEntity.status(HttpStatus.OK)
               .body(new SuccessResponse("Invitation accepted successfully"));
     } catch (JwtException | AdministratorCompanyNotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
               .body(new ErrorResponse("Invalid token"));
     } catch (PasswordPolicyService.WeakPasswordException | IllegalArgumentException e) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -119,7 +119,7 @@ public class AdministratorController {
               .body(new ErrorResponse("Invitation accepted successfully"));
 
     } catch (JwtException | AdministratorCompanyNotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
               .body(new ErrorResponse("Invalid token"));
     } catch (Exception e) {
       logger.severe("Error accepting invite: " + e.getMessage());
