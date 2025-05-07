@@ -28,8 +28,12 @@ public class DatabaseSeeder {
     return args -> {
       // Create and save Scopes
       if (!scopeRepository.existsByKey("fishery-activity")) {
-        Scope scope1 = new Scope("fishery-activity", "Fishery activity", "Allows reading fishery activity data");
-        scopeRepository.save(scope1);
+        Scope scope = new Scope("fishery-activity", "Fishery activity", "Allows reading fishery activity data");
+        scopeRepository.save(scope);
+      }
+      if (!scopeRepository.existsByKey("fishing-facility")) {
+        Scope scope = new Scope("fishing-facility", "Fishery facility", "Allows reading fishery facility data");
+        scopeRepository.save(scope);
       }
 
       Company companyForAdministrator;
