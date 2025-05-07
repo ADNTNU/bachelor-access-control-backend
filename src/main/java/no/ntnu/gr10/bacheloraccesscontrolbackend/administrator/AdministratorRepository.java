@@ -29,4 +29,5 @@ public interface AdministratorRepository extends JpaRepository<Administrator, Lo
   @Query("SELECT a FROM Administrator a WHERE a.email = :input OR a.username = :input")
   Optional<Administrator> findByUsernameOrEmail(@Param("input") String input);
 
+  Optional<Administrator> findByEmail(String email);
 }
