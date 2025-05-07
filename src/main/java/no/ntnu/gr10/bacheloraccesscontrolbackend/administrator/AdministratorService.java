@@ -128,7 +128,7 @@ public class AdministratorService {
 
     String temporaryUUIDForUsername = UUID.randomUUID().toString();
 
-    Administrator administrator = administratorRepository.findByUsername(inviteAdministratorRequest.getEmail()).orElse(
+    Administrator administrator = administratorRepository.findByEmail(inviteAdministratorRequest.getEmail()).orElse(
             new Administrator(
                     inviteAdministratorRequest.getEmail(),
                     temporaryUUIDForUsername,
