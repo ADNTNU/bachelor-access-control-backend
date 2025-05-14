@@ -26,6 +26,9 @@ import java.io.IOException;
  * Filter for JWT authentication.
  * This filter checks for the presence of a JWT token in the request header,
  * validates it, and sets the authentication in the security context.
+ *
+ * @author Anders Lund and Daniel Neset
+ * @version 07.04.2025
  */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -41,6 +44,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     this.userDetailsService = userDetailsService;
   }
 
+  /**
+   * Filters incoming requests to process the JWT token if present.
+   * If a valid JWT is found, it extracts the user details from it and registers
+   * the authentication in the SecurityContext.
+   *
+   * @param request  the HTTP request
+   * @param response the HTTP response
+   * @param filterChain the filter chain
+   */
   @Override
   protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) {
     try {

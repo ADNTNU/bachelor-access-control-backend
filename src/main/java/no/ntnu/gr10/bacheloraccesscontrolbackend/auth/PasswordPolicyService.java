@@ -2,6 +2,14 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.auth;
 
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for validating password policies.
+ * This service checks if the password meets certain criteria such as length, presence of numbers,
+ * uppercase letters, etc.
+ *
+ * @author Anders Lund
+ * @version 23.04.2025
+ */
 @Service
   public class PasswordPolicyService {
 
@@ -18,6 +26,12 @@ import org.springframework.stereotype.Service;
       // Add more checks if needed
     }
 
+    /**
+     * Exception thrown when a password does not meet the policy requirements.
+     *
+     * @author Anders Lund
+     * @version 23.04.2025
+     */
     public static class WeakPasswordException extends RuntimeException {
         public WeakPasswordException(String message) {
             super(message);

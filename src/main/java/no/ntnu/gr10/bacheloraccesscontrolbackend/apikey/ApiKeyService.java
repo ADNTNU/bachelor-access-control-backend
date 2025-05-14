@@ -72,6 +72,17 @@ public class ApiKeyService {
     );
   }
 
+  /**
+   * Get a list of API keys by their IDs and company ID.
+   * <p>
+   * This method retrieves a list of API keys based on the provided list of API key IDs
+   * and the company ID. It returns a list of API keys that match the specified criteria.
+   * </p>
+   *
+   * @param apiKeyIds the list of API key IDs to search for
+   * @param companyId the ID of the company associated with the API keys
+   * @return a list of API keys matching the specified criteria
+   */
   public List<ApiKey> getApiKeysByApiKeyIdsAndCompanyId(List<Long> apiKeyIds, long companyId) {
     return apiKeyRepository.findByApiKeyIdsAndCompanyId(apiKeyIds, companyId);
   }
@@ -86,10 +97,10 @@ public class ApiKeyService {
    * @param createApiKeyRequest the request object containing the details for creating the API key
    * @return the response body containing the created API key
    * @throws CompanyNotFoundException if the company with the specified ID does not exist
-   * @throws ScopeNotFoundException if any of the specified scopes do not exist
+   * @throws ScopeNotFoundException  if any of the specified scopes do not exist
    */
   @Transactional
-  public CreateApiKeyResponse createApiKey(CreateApiKeyRequest createApiKeyRequest) {
+  public CreateApiKeyResponse createApiKey(CreateApiKeyRequest createApiKeyRequest) throws CompanyNotFoundException, ScopeNotFoundException {
     Company company = companyService.getCompanyById(createApiKeyRequest.getCompanyId());
 
     List<Scope> scopes = createApiKeyRequest.getScopes().stream()
@@ -124,15 +135,38 @@ public class ApiKeyService {
     return UUID.randomUUID().toString();
   }
 
+  /**
+   * Delete API keys based on the provided request.
+   * <p>
+   *   This method deletes API keys that match the specified criteria in the request object.
+   *   It retrieves the API keys by their IDs and company ID,
+   *   and then deletes them from the database.
+   *   </p>
+   *
+   * @param deleteApiKeysRequest the request object containing the list of API key IDs and company ID
+   */
   @Transactional
-  public void deleteApiKeys(DeleteApiKeysRequest deleteApiKeysRequest) throws AdministratorCompanyNotFoundException {
+  public void deleteApiKeys(DeleteApiKeysRequest deleteApiKeysRequest) {
     List<ApiKey> apiKeys = getApiKeysByApiKeyIdsAndCompanyId(deleteApiKeysRequest.getApiKeyIds(), deleteApiKeysRequest.getCompanyId());
 
     apiKeyRepository.deleteAll(apiKeys);
   }
 
+  /**
+   * Update an existing API key.
+   * <p>
+   * This method updates the details of an existing API key based on the provided request object.
+   * It retrieves the API key by its ID and company ID, and then updates its properties.
+   * </p>
+   *
+   * @param id                   the ID of the API key to update
+   * @param updateApiKeyRequest  the request object containing the updated details for the API key
+   * @return the response body containing the updated API key
+   * @throws ApiKeyNotFoundException if the API key with the specified ID does not exist
+   * @throws ScopeNotFoundException  if any of the specified scopes do not exist
+   */
   @Transactional
-  public UpdateApiKeyResponse updateApiKey(Long id, UpdateApiKeyRequest updateApiKeyRequest) {
+  public UpdateApiKeyResponse updateApiKey(Long id, UpdateApiKeyRequest updateApiKeyRequest) throws ApiKeyNotFoundException, ScopeNotFoundException {
     ApiKey apiKey = apiKeyRepository.findByIdAndCompanyId(id, updateApiKeyRequest.getCompanyId())
             .orElseThrow(() -> new ApiKeyNotFoundException("API key not found"));
 

@@ -2,7 +2,21 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+/**
+ * DTO for updating an administrator-company relationship.
+ *
+ * @author Anders Lund
+ * @version 23.04.2025
+ */
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UpdateAdministratorCompanyRequest {
   @NotNull
   @NotBlank
@@ -16,37 +30,4 @@ public class UpdateAdministratorCompanyRequest {
   @NotBlank
   private String role;
 
-  public UpdateAdministratorCompanyRequest() {
-    // Default constructor for deserialization
-  }
-
-  public UpdateAdministratorCompanyRequest(Long companyId, Boolean enabled, String role) {
-    this.companyId = companyId;
-    this.enabled = enabled;
-    this.role = role;
-  }
-
-  public Long getCompanyId() {
-    return companyId;
-  }
-
-  public void setCompanyId(Long companyId) {
-    this.companyId = companyId;
-  }
-
-  public Boolean getEnabled() {
-    return enabled;
-  }
-
-  public void setEnabled(Boolean enabled) {
-    this.enabled = enabled;
-  }
-
-  public String getRole() {
-    return role;
-  }
-
-  public void setRole(String role) {
-    this.role = role;
-  }
 }

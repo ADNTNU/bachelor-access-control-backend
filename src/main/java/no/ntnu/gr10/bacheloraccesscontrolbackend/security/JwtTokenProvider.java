@@ -17,7 +17,7 @@ import java.util.Date;
 /**
  * Utility class for generating and verifying JWT tokens.
  *
- * @author Anders Lund
+ * @author Anders Lund and Daniel Neset
  * @version 05.04.2025
  */
 @Component
@@ -74,8 +74,8 @@ public class JwtTokenProvider {
   /**
    * Generates a refresh token for the given authentication.
    * <p>
-   *   This method creates a JWT token using the provided authentication information.
-   *   The token includes the adminId, issued date, and expiration date.
+   * This method creates a JWT token using the provided authentication information.
+   * The token includes the adminId, issued date, and expiration date.
    * </p>
    *
    * @param authentication the authentication object containing user details
@@ -122,7 +122,7 @@ public class JwtTokenProvider {
    *
    * @param token the JWT token to verify
    * @return the admin ID extracted from the token
-   * @throws JwtException             if the token is invalid or expired
+   * @throws JwtException if the token is invalid or expired
    */
   public String verifyAuthTokenAndGetAdminId(String token) throws JwtException {
     Claims claims = verifyTokenAndGetClaims(token);
@@ -229,8 +229,7 @@ public class JwtTokenProvider {
    *
    * @param token the password reset token to verify
    * @return the admin ID extracted from the token
-   * @throws JwtException             if the token is invalid or expired
-   * @throws IllegalArgumentException if the token is null or empty
+   * @throws JwtException if the token is invalid or expired
    */
   public String verifyPasswordResetTokenAndGetAdminId(String token) throws JwtException {
     Claims claims = verifyTokenAndGetClaims(token);
@@ -244,15 +243,15 @@ public class JwtTokenProvider {
   }
 
   private Claims verifyTokenAndGetClaims(String token) throws JwtException {
-    if (token == null || token.isEmpty()) {
-      throw new JwtException("Token cannot be null or empty");
+    try {
+      return Jwts.parser()
+              .verifyWith(getSigningKey())
+              .build()
+              .parseSignedClaims(token)
+              .getPayload();
+    } catch (Exception e) {
+      throw new JwtException("Invalid token", e);
     }
-
-    return Jwts.parser()
-            .verifyWith(getSigningKey())
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
   }
 
   private SecretKey getSigningKey() {

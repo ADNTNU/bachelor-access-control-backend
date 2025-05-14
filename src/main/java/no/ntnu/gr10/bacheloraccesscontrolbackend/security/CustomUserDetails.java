@@ -1,7 +1,6 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
@@ -20,6 +19,7 @@ import java.util.stream.Collectors;
  * @author Anders Lund
  * @version 07.04.2025
  */
+@Getter
 public class CustomUserDetails implements UserDetails {
 
   private final long id;
@@ -54,15 +54,6 @@ public class CustomUserDetails implements UserDetails {
     this.registered = administrator.getRegistered();
   }
 
-  /**
-   * Gets the ID of the user.
-   *
-   * @return the ID of the user
-   */
-  public long getId() {
-    return id;
-  }
-
   @Override
   @SuppressWarnings("java:S4275")
   public String getUsername() {
@@ -86,21 +77,5 @@ public class CustomUserDetails implements UserDetails {
 
   public String getActualUsername() {
     return username;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public Set<Long> getCompanyIds() {
-    return companyIds;
-  }
-
-  public @NotNull @NotBlank Date getRegistered() {
-    return registered;
   }
 }

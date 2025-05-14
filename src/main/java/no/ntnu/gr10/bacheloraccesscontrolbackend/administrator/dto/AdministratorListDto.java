@@ -1,15 +1,47 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
 
+
+/**
+ * Data Transfer Object (DTO) for used when sending a list of administrators.
+ * This class is used in a {@link java.util.List} when sending a list of administrators.
+ */
+@Getter
+@Setter
+@NoArgsConstructor(force = true)
+@AllArgsConstructor
 public class AdministratorListDto {
+
+  @NotNull
   private final long id;
-  private final boolean enabled;
-  private final boolean accepted;
-  private final boolean registered;
+
+  @NotNull
+  private final Boolean enabled;
+
+  @NotNull
+  private final Boolean accepted;
+
+  @NotNull
+  private final Boolean registered;
+
+  @NotNull
+  @NotBlank
   private final String username;
+
+  @NotNull
+  @NotBlank
   private final String email;
+
+  @NotNull
+  @NotBlank
   private final String name;
 
   public AdministratorListDto(AdministratorCompany administratorCompany) {
@@ -21,33 +53,5 @@ public class AdministratorListDto {
     this.username = administrator.getUsername();
     this.email = administrator.getEmail();
     this.name = administrator.getFirstName() + " " + administrator.getLastName();
-  }
-
-  public long getId() {
-    return id;
-  }
-
-  public boolean isEnabled() {
-    return enabled;
-  }
-
-  public boolean isAccepted() {
-    return accepted;
-  }
-
-  public boolean isRegistered() {
-    return registered;
-  }
-
-  public String getUsername() {
-    return username;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public String getName() {
-    return name;
   }
 }

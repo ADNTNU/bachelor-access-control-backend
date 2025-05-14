@@ -30,6 +30,7 @@ public class CustomUserDetailsService implements UserDetailsService {
    *   This method retrieves user details from the database based on the provided username.
    *   If the user is not found, it throws a UsernameNotFoundException.
    *   </p>
+   * @param usernameOrEmail the username or email of the user to be loaded.
    * @return UserDetails object containing user information.
    * @throws UsernameNotFoundException if the user is not found.
    */

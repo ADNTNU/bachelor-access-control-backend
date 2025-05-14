@@ -2,7 +2,18 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+/**
+ * DTO for the response of an API key update.
+ */
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UpdateApiKeyResponse {
 
   @NotBlank
@@ -13,28 +24,4 @@ public class UpdateApiKeyResponse {
   @NotNull
   private String clientId;
 
-  public UpdateApiKeyResponse() {
-    // Default constructor for serialization
-  }
-
-  public UpdateApiKeyResponse(Long id, String clientId) {
-    this.id = id;
-    this.clientId = clientId;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getClientId() {
-    return clientId;
-  }
-
-  public void setClientId(String clientId) {
-    this.clientId = clientId;
-  }
 }

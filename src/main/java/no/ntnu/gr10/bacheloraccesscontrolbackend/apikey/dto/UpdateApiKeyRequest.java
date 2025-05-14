@@ -2,9 +2,24 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * DTO for updating an API key.
+ * Contains fields for the API key's properties.
+ *
+ * @author Anders Lund
+ * @version 23.04.2025
+ */
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UpdateApiKeyRequest {
   @NotBlank
   @NotNull
@@ -22,55 +37,4 @@ public class UpdateApiKeyRequest {
   @NotNull
   private List<String> scopes;
 
-  public UpdateApiKeyRequest() {
-    // Default constructor for serialization
-  }
-
-  public UpdateApiKeyRequest(boolean enabled, String name, String description, Long companyId, List<String> scopes) {
-    this.enabled = enabled;
-    this.name = name;
-    this.description = description;
-    this.companyId = companyId;
-    this.scopes = scopes;
-  }
-
-  public boolean isEnabled() {
-    return enabled;
-  }
-
-  public void setEnabled(boolean enabled) {
-    this.enabled = enabled;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getDescription() {
-    return description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public Long getCompanyId() {
-    return companyId;
-  }
-
-  public void setCompanyId(Long companyId) {
-    this.companyId = companyId;
-  }
-
-  public List<String> getScopes() {
-    return scopes;
-  }
-
-  public void setScopes(List<String> scopes) {
-    this.scopes = scopes;
-  }
 }

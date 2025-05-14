@@ -2,7 +2,22 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.dto.requests;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+/**
+ * Represents a request for a paginated CRUD list operation.
+ * This class is used to encapsulate the parameters required for such an operation.
+ *
+ * @author Anders Lund
+ * @version 23.04.2025
+ */
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PaginatedCRUDListRequest {
   @NotNull
   @NotBlank
@@ -16,37 +31,4 @@ public class PaginatedCRUDListRequest {
   @NotBlank
   private Long companyId;
 
-  public PaginatedCRUDListRequest() {
-    // Default constructor for deserialization
-  }
-
-  public PaginatedCRUDListRequest(Integer page, Integer size, Long companyId) {
-    this.page = page;
-    this.size = size;
-    this.companyId = companyId;
-  }
-
-  public Integer getPage() {
-    return page;
-  }
-
-  public void setPage(Integer page) {
-    this.page = page;
-  }
-
-  public Integer getSize() {
-    return size;
-  }
-
-  public void setSize(Integer size) {
-    this.size = size;
-  }
-
-  public Long getCompanyId() {
-    return companyId;
-  }
-
-  public void setCompanyId(Long companyId) {
-    this.companyId = companyId;
-  }
 }

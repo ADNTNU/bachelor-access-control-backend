@@ -3,9 +3,21 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * DTO for deleting API keys.
+ * Contains the company ID and a list of API key IDs to be deleted.
+ */
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class DeleteApiKeysRequest {
 
   @NotBlank
@@ -17,29 +29,4 @@ public class DeleteApiKeysRequest {
   @NotEmpty
   private List<Long> apiKeyIds;
 
-
-  public DeleteApiKeysRequest() {
-    // Default constructor for deserialization
-  }
-
-  public DeleteApiKeysRequest(Long companyId, List<Long> apiKeyIds) {
-    this.companyId = companyId;
-    this.apiKeyIds = apiKeyIds;
-  }
-
-  public Long getCompanyId() {
-    return companyId;
-  }
-
-  public void setCompanyId(Long companyId) {
-    this.companyId = companyId;
-  }
-
-  public List<Long> getApiKeyIds() {
-    return apiKeyIds;
-  }
-
-  public void setApiKeyIds(List<Long> apiKeyIds) {
-    this.apiKeyIds = apiKeyIds;
-  }
 }

@@ -31,12 +31,15 @@ public class ScopeController {
   }
 
   /**
+   * Fetches all enabled scopes.
+   * This endpoint returns a list of all scopes that are currently enabled in the system.
    *
+   * @return ResponseEntity containing the list of enabled scopes or an error message
    */
   @GetMapping("/all")
   public ResponseEntity<?> getAllScopes() {
     try {
-      return ResponseEntity.ok(scopeService.getAllSimpleScopes());
+      return ResponseEntity.ok(scopeService.getAllEnabledSimpleScopes());
     } catch (Exception e) {
       logger.severe("Error fetching scopes: " + e.getMessage());
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred while fetching scopes"));

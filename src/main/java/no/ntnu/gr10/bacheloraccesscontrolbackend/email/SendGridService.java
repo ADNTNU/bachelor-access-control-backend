@@ -13,6 +13,13 @@ import java.util.Map;
 
 import static no.ntnu.gr10.bacheloraccesscontrolbackend.security.JwtTokenProvider.PASSWORD_RESET_TOKEN_EXPIRATION_MS;
 
+/**
+ * Service class for sending emails using SendGrid.
+ * This class provides methods to send password reset and admin invitation emails.
+ *
+ * @author Anders Lund
+ * @version 23.04.2025
+ */
 @Service
 public class SendGridService {
 
@@ -24,10 +31,23 @@ public class SendGridService {
   @Value("${sendgrid.template.invite-admin}")
   private String inviteAdminTemplateId;
 
+  /**
+   * Constructs a new SendGridService with the provided API key.
+   *
+   * @param apiKey the SendGrid API key
+   */
   public SendGridService(@Value("${sendgrid.api.key}") String apiKey) {
     this.sendGrid = new SendGrid(apiKey);
   }
 
+  /**
+   * Sends a password reset email to the specified recipient.
+   *
+   * @param to        the recipient's email address
+   * @param resetUrl  the URL for resetting the password
+   * @param firstName the recipient's first name
+   * @throws SendMailException if an error occurs while sending the email
+   */
   public void sendPasswordResetEmail(String to, String resetUrl, String firstName) throws SendMailException {
     String expirationMinutes = String.valueOf(PASSWORD_RESET_TOKEN_EXPIRATION_MS / 60000);
     Mail mail = buildDynamicTemplateMail(to, resetPasswordTemplateId, Map.of(
@@ -38,6 +58,14 @@ public class SendGridService {
     send(mail);
   }
 
+  /**
+   * Sends an admin invitation email to the specified recipient.
+   *
+   * @param to         the recipient's email address
+   * @param companyName the name of the company
+   * @param inviteUrl  the URL for accepting the invitation
+   * @throws SendMailException if an error occurs while sending the email
+   */
   public void sendInviteAdminEmail(String to, String companyName, String inviteUrl) throws SendMailException {
     Mail mail = buildDynamicTemplateMail(to, inviteAdminTemplateId, Map.of(
             "companyName", companyName,

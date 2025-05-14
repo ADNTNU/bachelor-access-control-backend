@@ -2,7 +2,18 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+/**
+ * DTO for resetting a user's password.
+ */
+@NoArgsConstructor
+@AllArgsConstructor
+@Setter
+@Getter
 public class ResetPasswordRequest {
 
   @NotNull
@@ -13,28 +24,4 @@ public class ResetPasswordRequest {
   @NotBlank
   private String newPassword;
 
-  public ResetPasswordRequest() {
-    // Default constructor for deserialization
-  }
-
-  public ResetPasswordRequest(String token, String newPassword) {
-    this.token = token;
-    this.newPassword = newPassword;
-  }
-
-  public String getToken() {
-    return token;
-  }
-
-  public void setToken(String token) {
-    this.token = token;
-  }
-
-  public String getNewPassword() {
-    return newPassword;
-  }
-
-  public void setNewPassword(String newPassword) {
-    this.newPassword = newPassword;
-  }
 }
