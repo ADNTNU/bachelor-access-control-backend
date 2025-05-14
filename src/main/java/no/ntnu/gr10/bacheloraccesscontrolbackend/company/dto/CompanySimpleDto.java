@@ -2,7 +2,20 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.company.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+/**
+ * A simple DTO class representing a company with an ID and name.
+ * This class is used for transferring company data between different layers of the application.
+ */
+
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class CompanySimpleDto {
 
   @NotNull
@@ -12,29 +25,4 @@ public class CompanySimpleDto {
   @NotNull
   @NotBlank
   private String name;
-
-  public CompanySimpleDto() {
-    // Default constructor for deserialization
-  }
-
-  public CompanySimpleDto(Long id, String name) {
-    this.id = id;
-    this.name = name;
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
 }

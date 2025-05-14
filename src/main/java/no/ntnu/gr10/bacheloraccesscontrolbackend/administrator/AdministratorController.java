@@ -19,9 +19,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.logging.Logger;
 
 
+/**
+ * Controller for managing administrator-company relationships.
+ * Provides endpoints for listing, inviting, accepting invites, updating, and deleting administrator-company relationships.
+ *
+ * @author Anders Lund
+ * @version 23.04.2025
+ */
 @RestController
 @RequestMapping("/administrator")
 @Tag(name = "Administrator", description = "Administrator endpoints")
@@ -36,12 +44,19 @@ public class AdministratorController {
     this.administratorService = administratorService;
   }
 
+  /**
+   * Endpoint to list administrators by company ID.
+   *
+   * @param paginatedCRUDListRequest the request containing pagination and company ID
+   * @param userDetails the authenticated user's details
+   * @return a paginated list of administrators for the specified company
+   */
   @PostMapping("/list")
   public ResponseEntity<?> listAdministratorsByCompanyId(@RequestBody PaginatedCRUDListRequest paginatedCRUDListRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
     try {
-      if (!userDetails.getCompanyIds().contains(paginatedCRUDListRequest.getCompanyId())) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("You do not have access to this company"));
+      Optional<ResponseEntity<ErrorResponse>> accessCheck = checkUserAccessToCompany(paginatedCRUDListRequest.getCompanyId(), userDetails);
+      if (accessCheck.isPresent()) {
+        return accessCheck.get();
       }
 
       if (paginatedCRUDListRequest.getPage() < 1 || paginatedCRUDListRequest.getSize() <= 0) {
@@ -59,12 +74,19 @@ public class AdministratorController {
     }
   }
 
+  /**
+   * Endpoint to invite an administrator to a company.
+   *
+   * @param inviteAdministratorRequest the request containing invitation details
+   * @param userDetails the authenticated user's details
+   * @return a response indicating the result of the invitation
+   */
   @PostMapping("/invite")
   public ResponseEntity<?> inviteAdministrator(@RequestBody InviteAdministratorRequest inviteAdministratorRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
     try {
-      if (!userDetails.getCompanyIds().contains(inviteAdministratorRequest.getCompanyId())) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ErrorResponse("You do not have access to this company"));
+      Optional<ResponseEntity<ErrorResponse>> accessCheck = checkUserAccessToCompany(inviteAdministratorRequest.getCompanyId(), userDetails);
+      if (accessCheck.isPresent()) {
+        return accessCheck.get();
       }
 
       administratorService.inviteAdministrator(inviteAdministratorRequest);
@@ -90,6 +112,12 @@ public class AdministratorController {
     }
   }
 
+  /**
+   * Endpoint to register and accept an administrator invite.
+   *
+   * @param acceptAdministratorInviteRequest the request containing registration and invitation acceptance details
+   * @return a response indicating the result of the registration and invitation acceptance
+   */
   @PostMapping("/register-from-invite")
   public ResponseEntity<?> registerAndAcceptInvite(@RequestBody RegisterAndAcceptAdministratorInviteRequest acceptAdministratorInviteRequest) {
     try {
@@ -110,6 +138,12 @@ public class AdministratorController {
     }
   }
 
+  /**
+   * Endpoint to accept an administrator invite without registration. Only available for existing users.
+   *
+   * @param acceptAdministratorInviteRequest the request containing invitation acceptance details
+   * @return a response indicating the result of the invitation acceptance
+   */
   @PostMapping("/accept-invite")
   public ResponseEntity<?> acceptInvite(@RequestBody AcceptAdministratorInviteRequest acceptAdministratorInviteRequest) {
     try {
@@ -128,6 +162,14 @@ public class AdministratorController {
     }
   }
 
+  /**
+   * Endpoint to update an administrator-company relationship.
+   *
+   * @param administratorId the ID of the administrator to update
+   * @param updateAdministratorCompanyRequest the request containing updated details
+   * @param userDetails the authenticated user's details
+   * @return a response indicating the result of the update
+   */
   @PutMapping("/{administratorId}")
   public ResponseEntity<?> updateAdministratorCompany(@PathVariable("administratorId") Long administratorId,
                                                       @RequestBody UpdateAdministratorCompanyRequest updateAdministratorCompanyRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -157,6 +199,13 @@ public class AdministratorController {
     }
   }
 
+  /**
+   * Endpoint to delete one or more administrator-company relationships.
+   *
+   * @param deleteAdministratorCompanyRequest the request containing deletion details
+   * @param userDetails the authenticated user's details
+   * @return a response indicating the result of the deletion
+   */
   @DeleteMapping()
   public ResponseEntity<?> deleteAdministratorCompany(
                                                       @RequestBody DeleteAdministratorCompanyRequest deleteAdministratorCompanyRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -178,5 +227,19 @@ public class AdministratorController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
               .body(new ErrorResponse("An error occurred while deleting the administrator"));
     }
+  }
+
+  /**
+   * Checks if the user has access to the company.
+   *
+   * @param companyId the ID of the company
+   * @return a ResponseEntity of type ErrorResponse if the user does not have access
+   */
+  private Optional<ResponseEntity<ErrorResponse>> checkUserAccessToCompany(Long companyId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    if (!userDetails.getCompanyIds().contains(companyId)) {
+      return Optional.of(ResponseEntity.status(HttpStatus.FORBIDDEN)
+              .body(new ErrorResponse("You do not have access to this company")));
+    }
+    return Optional.empty();
   }
 }

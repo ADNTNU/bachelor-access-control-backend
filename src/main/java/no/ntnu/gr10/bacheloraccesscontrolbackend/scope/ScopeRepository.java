@@ -3,7 +3,6 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.scope;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.scope.dto.ScopeSimpleDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +16,11 @@ import java.util.Optional;
  */
 public interface ScopeRepository extends JpaRepository<Scope, Long> {
 
+  /**
+   * Find all scopes that are enabled.
+   *
+   * @return A list of enabled scopes as ScopeSimpleDto.
+   */
   @Query("SELECT new no.ntnu.gr10.bacheloraccesscontrolbackend.scope.dto.ScopeSimpleDto(" +
             "s.key, " +
             "s.name, " +
@@ -24,14 +28,21 @@ public interface ScopeRepository extends JpaRepository<Scope, Long> {
           ") " +
           "FROM Scope s " +
           "WHERE s.enabled = true")
-  List<ScopeSimpleDto> findAllScopeSimpleDtos();
+  List<ScopeSimpleDto> findAllScopeSimpleDtosByEnabledIsTrue();
 
-  @Query("""
-          SELECT s
-          FROM Scope s
-          WHERE s.key = :scopeKey AND s.enabled = true
-""")
-  Optional<Scope> findByKey(@Param("scopeKey") String scopeKey);
+  /**
+   * Find a scope by its key.
+   *
+   * @param key The key of the scope to find.
+   * @return An Optional containing the found scope, or empty if not found.
+   */
+  Optional<Scope> findDistinctByKeyIsAndEnabledIsTrue(String key);
 
+  /**
+   * Check if a scope with the given key exists in the database.
+   *
+   * @param key The key of the scope to check.
+   * @return true if the scope exists, false otherwise.
+   */
   boolean existsByKey(String key);
 }

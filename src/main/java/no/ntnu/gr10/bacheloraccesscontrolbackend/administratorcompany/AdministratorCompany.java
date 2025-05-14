@@ -5,6 +5,14 @@ import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorRole;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 
+/**
+ * Represents the association between an administrator and a company.
+ * This entity is used to manage the relationship between administrators and companies,
+ * including their roles and status (enabled/accepted).
+ *
+ * @author Anders Lund
+ * @version 23.04.2025
+ */
 @Entity
 @Table(name = "administrator_company")
 public class AdministratorCompany {

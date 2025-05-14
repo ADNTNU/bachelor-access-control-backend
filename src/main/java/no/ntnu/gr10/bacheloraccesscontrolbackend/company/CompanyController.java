@@ -33,7 +33,10 @@ public class CompanyController {
   }
 
   /**
-   * Fetches all companies associated with the authenticated user.
+   * Endpoint to fetch all companies associated with the authenticated user.
+   *
+   * @param userDetails the authenticated user details
+   * @return a ResponseEntity containing the list of companies or an error response
    */
   @GetMapping("/all")
   public ResponseEntity<?> getAllCompanies(@AuthenticationPrincipal CustomUserDetails userDetails) {

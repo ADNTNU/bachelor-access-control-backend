@@ -69,6 +69,7 @@ public class AuthenticationController {
    * </p>
    *
    * @param loginRequest the login request containing username and password
+   * @return a ResponseEntity containing the authentication response or an error response
    */
   @PostMapping("/login")
   public ResponseEntity<?> authenticate(@RequestBody LoginRequest loginRequest) {
@@ -94,6 +95,13 @@ public class AuthenticationController {
     }
   }
 
+  /**
+   * Logs out the user and invalidates the session.
+   * @param request the HTTP request
+   * @param response the HTTP response
+   * @param authentication the authentication object
+   * @return a ResponseEntity indicating the logout status
+   */
   @PostMapping("/logout")
   public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
     if (authentication != null) {
@@ -109,6 +117,9 @@ public class AuthenticationController {
    * If the token is valid, it generates a new access token and returns it in the response.
    * If the token is invalid, it returns an unauthorized response.
    * </p>
+   *
+   * @param refreshTokenRequest the request containing the refresh token
+   * @return a ResponseEntity containing the new access token or an error response
    */
   @PostMapping("/refresh-token")
   public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
@@ -137,6 +148,16 @@ public class AuthenticationController {
     }
   }
 
+  /**
+   * Requests a password reset for the specified email address.
+   * <p>
+   * This method handles the password reset request by sending a reset link to the provided email address.
+   * If the email address is not found, it returns a success response to prevent email enumeration attacks.
+   * </p>
+   *
+   * @param request the request containing the email address
+   * @return a ResponseEntity indicating the status of the password reset request
+   */
   @SuppressWarnings("java:S6863")
   @PostMapping("/request-password-reset")
   public ResponseEntity<?> requestPasswordReset(@RequestBody RequestPasswordResetRequest request) {
@@ -151,6 +172,16 @@ public class AuthenticationController {
     }
   }
 
+  /**
+   * Resets the password using the provided token and new password.
+   * <p>
+   * This method handles the password reset request by validating the provided token and updating the password.
+   * If the token is invalid or expired, it returns an unauthorized response.
+   * </p>
+   *
+   * @param request the request containing the token and new password
+   * @return a ResponseEntity indicating the status of the password reset
+   */
   @PostMapping("/reset-password")
   public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
     try {

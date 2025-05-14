@@ -18,6 +18,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.logging.Logger;
 
+/**
+ * Controller class for managing API keys.
+ * Provides endpoints for creating, updating, deleting, and listing API keys.
+ *
+ * @author Anders Lund
+ * @version 16.04.2025
+ */
 @RestController
 @RequestMapping("/api-key")
 @Tag(name = "API key", description = "API key endpoints")
@@ -32,6 +39,13 @@ public class ApiKeyController {
     this.apiKeyService = apiKeyService;
   }
 
+  /**
+   * Endpoint to list API keys by company ID.
+   *
+   * @param paginatedCRUDListRequest the request object containing pagination and company ID
+   * @param userDetails              the authenticated user details
+   * @return a ResponseEntity containing the list of API keys with pagination details or an error response
+   */
   @PostMapping("/list")
   public ResponseEntity<?> listApiKeysByCompanyId(@RequestBody PaginatedCRUDListRequest paginatedCRUDListRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
     try {
@@ -55,6 +69,13 @@ public class ApiKeyController {
     }
   }
 
+  /**
+   * Endpoint to create a new API key.
+   *
+   * @param createApiKeyRequest the request object containing API key details
+   * @param userDetails         the authenticated user details
+   * @return a ResponseEntity containing the created API key or an error response
+   */
   @PostMapping()
   public ResponseEntity<?> createApiKey(@RequestBody CreateApiKeyRequest createApiKeyRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
     try {
@@ -80,6 +101,14 @@ public class ApiKeyController {
     }
   }
 
+  /**
+   * Endpoint to update an existing API key.
+   *
+   * @param id                    the ID of the API key to update
+   * @param updateApiKeyRequest   the request object containing updated API key details
+   * @param userDetails           the authenticated user details
+   * @return a ResponseEntity containing the updated API key or an error response
+   */
   @PutMapping("/{id}")
   public ResponseEntity<?> updateApiKey(@PathVariable Long id, @RequestBody UpdateApiKeyRequest updateApiKeyRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
     try {
@@ -107,6 +136,13 @@ public class ApiKeyController {
     }
   }
 
+  /**
+   * Endpoint to delete API keys.
+   *
+   * @param deleteApiKeysRequest the request object containing API key IDs and company ID
+   * @param userDetails          the authenticated user details
+   * @return a ResponseEntity indicating the result of the deletion operation
+   */
   @DeleteMapping()
   public ResponseEntity<?> deleteApiKey(
           @RequestBody DeleteApiKeysRequest deleteApiKeysRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {

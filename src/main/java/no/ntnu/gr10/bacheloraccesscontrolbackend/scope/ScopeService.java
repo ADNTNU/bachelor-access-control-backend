@@ -24,12 +24,24 @@ public class ScopeService {
     this.scopeRepository = scopeRepository;
   }
 
-  public List<ScopeSimpleDto> getAllSimpleScopes() {
-    return scopeRepository.findAllScopeSimpleDtos();
+  /**
+   * Retrieves all scopes that are enabled.
+   *
+   * @return a list of enabled scopes
+   */
+  public List<ScopeSimpleDto> getAllEnabledSimpleScopes() {
+    return scopeRepository.findAllScopeSimpleDtosByEnabledIsTrue();
   }
 
-  public Scope getScopeByScopeKey(String scopeKey) {
-    return scopeRepository.findByKey(scopeKey)
+  /**
+   * Retrieves a scope by its key.
+   *
+   * @param scopeKey the key of the scope to retrieve
+   * @return the scope with the specified key
+   * @throws ScopeNotFoundException if no scope with the specified key is found
+   */
+  public Scope getScopeByScopeKey(String scopeKey) throws ScopeNotFoundException {
+    return scopeRepository.findDistinctByKeyIsAndEnabledIsTrue(scopeKey)
             .orElseThrow(() -> new ScopeNotFoundException("Scope not found"));
 
   }

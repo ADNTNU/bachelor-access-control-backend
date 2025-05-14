@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Represents an API key entity.
@@ -18,6 +17,9 @@ import java.util.UUID;
  * The API key is associated with a specific company, which is the owner of the key.
  * The API key is assigned to different scopes, which define the permissions associated with the key.
  * </p>
+ *
+ * @author Anders Lund
+ * @version 05.05.2025
  */
 @Entity
 @Table(name = "api_keys")
