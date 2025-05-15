@@ -2,15 +2,14 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.Collection;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.security.CustomUserDetails;
 import org.springframework.security.core.GrantedAuthority;
-
-import java.util.Collection;
-import java.util.Date;
 
 /**
  * Response object for authentication requests.

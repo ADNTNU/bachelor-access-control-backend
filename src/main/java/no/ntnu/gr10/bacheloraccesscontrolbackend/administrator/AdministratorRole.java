@@ -4,8 +4,8 @@ import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.InvalidRoleException;
 
 /**
  * Enum representing the roles of an administrator.
- * <p>
- * The roles are:
+ *
+ * <p>The roles are:
  * <ul>
  *   <li>OWNER: The owner of the company.</li>
  *   <li>ADMINISTRATOR: An administrator of the company.</li>

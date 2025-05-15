@@ -1,17 +1,18 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.email;
 
+import static no.ntnu.gr10.bacheloraccesscontrolbackend.security.JwtTokenProvider.PASSWORD_RESET_TOKEN_EXPIRATION_MS;
+
 import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
+import java.util.Map;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.SendMailException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import java.util.Map;
 
-import static no.ntnu.gr10.bacheloraccesscontrolbackend.security.JwtTokenProvider.PASSWORD_RESET_TOKEN_EXPIRATION_MS;
 
 /**
  * Service class for sending emails using SendGrid.
@@ -48,7 +49,9 @@ public class SendGridService {
    * @param firstName the recipient's first name
    * @throws SendMailException if an error occurs while sending the email
    */
-  public void sendPasswordResetEmail(String to, String resetUrl, String firstName) throws SendMailException {
+  public void sendPasswordResetEmail(
+          String to, String resetUrl, String firstName
+  ) throws SendMailException {
     String expirationMinutes = String.valueOf(PASSWORD_RESET_TOKEN_EXPIRATION_MS / 60000);
     Mail mail = buildDynamicTemplateMail(to, resetPasswordTemplateId, Map.of(
             "firstName", firstName,
@@ -61,12 +64,14 @@ public class SendGridService {
   /**
    * Sends an admin invitation email to the specified recipient.
    *
-   * @param to         the recipient's email address
+   * @param to          the recipient's email address
    * @param companyName the name of the company
-   * @param inviteUrl  the URL for accepting the invitation
+   * @param inviteUrl   the URL for accepting the invitation
    * @throws SendMailException if an error occurs while sending the email
    */
-  public void sendInviteAdminEmail(String to, String companyName, String inviteUrl) throws SendMailException {
+  public void sendInviteAdminEmail(
+          String to, String companyName, String inviteUrl
+  ) throws SendMailException {
     Mail mail = buildDynamicTemplateMail(to, inviteAdminTemplateId, Map.of(
             "companyName", companyName,
             "inviteUrl", inviteUrl
@@ -74,7 +79,9 @@ public class SendGridService {
     send(mail);
   }
 
-  private Mail buildDynamicTemplateMail(String to, String templateId, Map<String, String> dynamicData) {
+  private Mail buildDynamicTemplateMail(
+          String to, String templateId, Map<String, String> dynamicData
+  ) {
     Email from = new Email("support@flightfinder.space");
     Email toEmail = new Email(to);
     Mail mail = new Mail();

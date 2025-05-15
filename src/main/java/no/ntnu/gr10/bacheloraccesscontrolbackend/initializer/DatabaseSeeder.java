@@ -1,5 +1,6 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.initializer;
 
+import java.util.Date;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorRepository;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorRole;
@@ -13,7 +14,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Date;
 
 /**
  * This class is responsible for seeding the database with initial data.
@@ -21,18 +21,39 @@ import java.util.Date;
 @Configuration
 public class DatabaseSeeder {
 
+  /**
+   * Seeds the database with initial data.
+   *
+   * @param scopeRepository         the repository for accessing scope data
+   * @param administratorRepository the repository for accessing administrator data
+   * @param companyRepository       the repository for accessing company data
+   * @param administratorService    the service for managing administrators
+   * @param passwordEncoder         the password encoder for encoding passwords
+   * @return a CommandLineRunner that seeds the database
+   */
   @Bean
   public CommandLineRunner seedDatabase(ScopeRepository scopeRepository,
                                         AdministratorRepository administratorRepository,
-                                        CompanyRepository companyRepository, AdministratorService administratorService, PasswordEncoder passwordEncoder) {
+                                        CompanyRepository companyRepository,
+                                        AdministratorService administratorService,
+                                        PasswordEncoder passwordEncoder
+  ) {
     return args -> {
       // Create and save Scopes
       if (!scopeRepository.existsByKey("fishery-activity")) {
-        Scope scope = new Scope("fishery-activity", "Fishery activity", "Allows reading fishery activity data");
+        Scope scope = new Scope(
+                "fishery-activity",
+                "Fishery activity",
+                "Allows reading fishery activity data"
+        );
         scopeRepository.save(scope);
       }
       if (!scopeRepository.existsByKey("fishing-facility")) {
-        Scope scope = new Scope("fishing-facility", "Fishery facility", "Allows reading fishery facility data");
+        Scope scope = new Scope(
+                "fishing-facility",
+                "Fishery facility",
+                "Allows reading fishery facility data"
+        );
         scopeRepository.save(scope);
       }
 

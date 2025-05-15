@@ -1,26 +1,39 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.apikey;
 
-import jakarta.persistence.*;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.scope.Scope;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.scope.Scope;
 
 /**
  * Represents an API key entity.
- * <p>
- * This entity is used to store API keys in the database.
+ *
+ * <p>This entity is used to store API keys in the database.
  * The API key is used for authentication and authorization purposes.
  * The API key is associated with a specific company, which is the owner of the key.
- * The API key is assigned to different scopes, which define the permissions associated with the key.
+ * The API key is assigned to different scopes, which define the permissions
+ * associated with the key.
  * </p>
  *
  * @author Anders Lund
  * @version 05.05.2025
  */
+@Getter
 @Entity
 @Table(name = "api_keys")
 public class ApiKey {
@@ -29,6 +42,7 @@ public class ApiKey {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Setter
   @Column
   private boolean enabled = true;
 
@@ -38,10 +52,10 @@ public class ApiKey {
   @Column(nullable = false)
   private String clientSecret;
 
-  @Column(nullable = false, length = 255)
+  @Column(nullable = false)
   private String name;
 
-  @Column(length = 255)
+  @Column
   private String description;
 
   @ManyToOne(fetch = FetchType.EAGER)
@@ -58,8 +72,8 @@ public class ApiKey {
 
   /**
    * Default constructor for JPA.
-   * <p>
-   * This constructor is used by JPA to create instances of the entity.
+   *
+   * <p>This constructor is used by JPA to create instances of the entity.
    * </p>
    */
   public ApiKey() {
@@ -74,7 +88,14 @@ public class ApiKey {
    * @param description A description of the API key.
    *
    */
-  public ApiKey(boolean enabled, Company company, String name, String description, String clientId, String clientSecret) {
+  public ApiKey(
+          boolean enabled,
+          Company company,
+          String name,
+          String description,
+          String clientId,
+          String clientSecret
+  ) {
     setEnabled(enabled);
     setCompany(company);
     setName(name);
@@ -84,39 +105,8 @@ public class ApiKey {
   }
 
   /**
-   * Gets the ID of the API key.
-   * @return The ID of the API key.
-   */
-  public Long getId() {
-    return id;
-  }
-
-  /**
-   * Gets the enabled status of the API key.
-   * @return The enabled status of the API key.
-   */
-  public boolean isEnabled() {
-    return enabled;
-  }
-
-  /**
-   * Sets the enabled status of the API key.
-   * @param enabled The enabled status to set.
-   */
-  public void setEnabled(boolean enabled) {
-    this.enabled = enabled;
-  }
-
-  /**
-   * Gets the client ID of the API key.
-   * @return The client ID of the API key.
-   */
-  public String getClientId() {
-    return clientId;
-  }
-
-  /**
    * Sets the client ID of the API key.
+   *
    * @param clientId The client ID to set.
    * @throws IllegalArgumentException if the client ID is null or empty.
    */
@@ -133,15 +123,8 @@ public class ApiKey {
   }
 
   /**
-   * Gets the client secret of the API key.
-   * @return The client secret of the API key.
-   */
-  public String getClientSecret() {
-    return clientSecret;
-  }
-
-  /**
    * Sets the client secret of the API key.
+   *
    * @param clientSecret The client secret to set.
    * @throws IllegalArgumentException if the client secret is null or empty.
    */
@@ -158,15 +141,8 @@ public class ApiKey {
   }
 
   /**
-   * Gets the name of the API key.
-   * @return The name of the API key.
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
    * Sets the name of the API key.
+   *
    * @param name The name to set.
    * @throws IllegalArgumentException if the name is null or empty.
    */
@@ -183,15 +159,8 @@ public class ApiKey {
   }
 
   /**
-   * Gets the description of the API key.
-   * @return The description of the API key.
-   */
-  public String getDescription() {
-    return description;
-  }
-
-  /**
    * Sets the description of the API key.
+   *
    * @param description The description to set.
    * @throws IllegalArgumentException if the description exceeds 255 characters.
    */
@@ -204,15 +173,8 @@ public class ApiKey {
   }
 
   /**
-   * Gets the company associated with the API key.
-   * @return The company associated with the API key.
-   */
-  public Company getCompany() {
-    return company;
-  }
-
-  /**
    * Sets the company associated with the API key.
+   *
    * @param company The company to set.
    * @throws IllegalArgumentException if the company is null.
    */
@@ -224,15 +186,8 @@ public class ApiKey {
   }
 
   /**
-   * Gets the scopes associated with the API key.
-   * @return The scopes associated with the API key.
-   */
-  public Set<Scope> getScopes() {
-    return scopes;
-  }
-
-  /**
    * Sets the scopes associated with the API key.
+   *
    * @param scopes The scopes to set.
    * @throws IllegalArgumentException if the scopes are null.
    */
@@ -247,24 +202,30 @@ public class ApiKey {
 
   /**
    * Checks if two API keys are equal.
-   * <p>
-   *   This method checks if two API keys are equal based on their ID and client ID.
+   *
+   * <p>This method checks if two API keys are equal based on their ID and client ID.
    *   </p>
+   *
    * @param o The object to compare with.
    * @return True if the API keys are equal, false otherwise.
    */
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof ApiKey apiKey)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof ApiKey apiKey)) {
+      return false;
+    }
     return Objects.equals(id, apiKey.id) && Objects.equals(clientId, apiKey.clientId);
   }
 
   /**
    * Returns the hash code of the API key.
-   * <p>
-   *   This method returns the hash code of the API key based on its ID and client ID.
+   *
+   * <p>This method returns the hash code of the API key based on its ID and client ID.
    *   </p>
+   *
    * @return The hash code of the API key.
    */
   @Override
@@ -274,20 +235,21 @@ public class ApiKey {
 
   /**
    * Returns a string representation of the API key.
-   * <p>
-   *   This method returns a string representation of the API key, including its ID, client ID, name, description, and company.
+   *
+   * <p>This method returns a string representation of the API key,
+   * including its ID, client ID, name, description, and company.
    *   Excludes the client secret for security reasons.
    *   </p>
+   *
    * @return A string representation of the API key.
    */
   @Override
   public String toString() {
-    return "ApiKey{" +
-            "id=" + id +
-            ", clientId='" + clientId + '\'' +
-            ", name='" + name + '\'' +
-            ", description='" + description + '\'' +
-            ", company=" + company +
-            '}';
+    return "ApiKey{"
+            + "id=" + id
+            + ", clientId='" + clientId + '\''
+            + ", name='" + name + '\''
+            + ", description='" + description + '\''
+            + ", company=" + company + '}';
   }
 }

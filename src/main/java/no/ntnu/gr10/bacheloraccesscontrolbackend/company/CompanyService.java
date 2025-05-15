@@ -1,11 +1,10 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.company;
 
+import java.util.List;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.dto.CompanySimpleDto;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.CompanyNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Service class for getting company-related information.
@@ -18,6 +17,11 @@ import java.util.List;
 public class CompanyService {
   final CompanyRepository companyRepository;
 
+  /**
+   * Constructor for CompanyService.
+   *
+   * @param companyRepository the repository for company operations
+   */
   @Autowired
   public CompanyService(CompanyRepository companyRepository) {
     this.companyRepository = companyRepository;
@@ -54,5 +58,5 @@ public class CompanyService {
     return companyRepository.save(company);
   }
 
-//  TODO: Add methods for creating, updating, and deleting companies
+  //  TODO: Add methods for creating, updating, and deleting companies
 }

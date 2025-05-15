@@ -1,21 +1,35 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.administrator;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 
-import java.util.*;
-
 /**
  * Represents an administrator entity.
- * <p>
- * This entity is used to store administrator information in the database.
- * The administrator is associated with different companies and has a username and password for authentication.
+ *
+ * <p>This entity is used to store administrator information in the database.
+ * The administrator is associated with different companies and has a username
+ * and password for authentication.
  * </p>
  *
  * @author Anders Lund
  * @version 06.04.2025
  */
+@Getter
 @Entity
 @Table(name = "administrators")
 public class Administrator {
@@ -23,6 +37,7 @@ public class Administrator {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Setter
   @Column
   private Date registered = null;
 
@@ -45,6 +60,9 @@ public class Administrator {
   private final Set<AdministratorCompany> administratorCompanies = new HashSet<>();
 
 
+  /**
+   * Default constructor for serialization.
+   */
   public Administrator() {
     // Default constructor for JPA
   }
@@ -55,21 +73,18 @@ public class Administrator {
    * @param username The username of the administrator.
    * @param password The password of the administrator.
    */
-  public Administrator(String email, String username, String password, String firstName, String lastName) {
+  public Administrator(
+          String email,
+          String username,
+          String password,
+          String firstName,
+          String lastName
+  ) {
     setEmail(email);
     setUsername(username);
     setPassword(password);
     setFirstName(firstName);
     setLastName(lastName);
-  }
-
-  /**
-   * Gets the ID of the administrator.
-   *
-   * @return The ID of the administrator.
-   */
-  public Long getId() {
-    return id;
   }
 
   /**
@@ -79,33 +94,6 @@ public class Administrator {
    */
   public boolean isRegistered() {
     return registered != null;
-  }
-
-  /**
-   * Get the date of registration.
-   *
-   * @return The registered date of the administrator.
-   */
-  public Date getRegistered() {
-    return registered;
-  }
-
-  /**
-   * Set the date of registration.
-   *
-   * @param registered The registered date to set.
-   */
-  public void setRegistered(Date registered) {
-    this.registered = registered;
-  }
-
-  /**
-   * Gets the email of the administrator.
-   *
-   * @return The email of the administrator.
-   */
-  public String getEmail() {
-    return email;
   }
 
   /**
@@ -129,14 +117,12 @@ public class Administrator {
   }
 
   /**
-   * Gets the username of the administrator.
+   * Sets the username of the Administrator.
+   * Has to not be blank and not exceed 254 in length.
    *
-   * @return The username of the administrator.
+   * @param username The username to set
+   * @throws IllegalArgumentException if the username is blank or greater than 254 characters
    */
-  public String getUsername() {
-    return username;
-  }
-
   public void setUsername(String username) throws IllegalArgumentException {
     if (username == null || username.isEmpty()) {
       throw new IllegalArgumentException("Username cannot be null or empty");
@@ -149,18 +135,10 @@ public class Administrator {
   }
 
   /**
-   * Gets the password of the administrator.
-   *
-   * @return The password of the administrator.
-   */
-  public String getPassword() {
-    return password;
-  }
-
-  /**
    * Set the password for the administrator.
    *
    * @param password The password to set.
+   * @throws IllegalArgumentException if the password is blank
    */
   public void setPassword(String password) throws IllegalArgumentException {
     if (password == null || password.isEmpty()) {
@@ -170,18 +148,10 @@ public class Administrator {
   }
 
   /**
-   * Get the first name of the administrator.
-   *
-   * @return The first name of the administrator.
-   */
-  public String getFirstName() {
-    return firstName;
-  }
-
-  /**
    * Set the first name of the administrator.
    *
    * @param firstName The first name to set.
+   * @throws IllegalArgumentException if the firstName is blank or greater than 255 characters
    */
   public void setFirstName(String firstName) throws IllegalArgumentException {
     if (firstName == null || firstName.isEmpty()) {
@@ -194,18 +164,10 @@ public class Administrator {
   }
 
   /**
-   * Get the last name of the administrator.
-   *
-   * @return The last name of the administrator.
-   */
-  public String getLastName() {
-    return lastName;
-  }
-
-  /**
    * Set the last name of the administrator.
    *
    * @param lastName The last name to set.
+   * @throws IllegalArgumentException if the lastName is blank or greater than 255 characters
    */
   public void setLastName(String lastName) throws IllegalArgumentException {
     if (lastName == null || lastName.isEmpty()) {
@@ -225,8 +187,12 @@ public class Administrator {
    */
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Administrator other)) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Administrator other)) {
+      return false;
+    }
 
     return Objects.equals(id, other.id) && username.equals(other.username);
   }
@@ -243,19 +209,21 @@ public class Administrator {
 
   /**
    * Returns a string representation of the administrator.
-   * <p>
-   * This method returns a string representation of the administrator, including its ID, username, and enabled status.
+   *
+   * <p>This method returns a string representation of the administrator,
+   * including its ID, username, and enabled status.
    * </p>
    *
    * @return A string representation of the administrator.
    */
   @Override
   public String toString() {
-    return "Administrator{" +
-            "id=" + id +
-            ", registered=" + registered +
-            ", username='" + username + '\'' +
-            '}';
+    return "Administrator{"
+            + "id=" + id
+            + ", registered="
+            + registered
+            + ", username='" + username + '\''
+            + '}';
   }
 
   /**
@@ -285,9 +253,13 @@ public class Administrator {
    *
    * @param company The company to add.
    * @param role    The role of the administrator in the company.
-   * @throws IllegalArgumentException if the company is null or if the administrator already has a link to this company.
+   * @throws IllegalArgumentException if the company is null or if the
+   *                                  administrator already has a link to this company.
    */
-  public AdministratorCompany addCompanyWithRole(Company company, AdministratorRole role) throws IllegalArgumentException {
+  public AdministratorCompany addCompanyWithRole(
+          Company company,
+          AdministratorRole role
+  ) throws IllegalArgumentException {
     if (company == null) {
       throw new IllegalArgumentException("Company cannot be null");
     }
@@ -305,5 +277,4 @@ public class Administrator {
 
     return link;
   }
-
 }

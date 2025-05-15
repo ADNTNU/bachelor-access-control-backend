@@ -18,7 +18,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PaginatedCRUDListRequest {
+public class PaginatedCrudListRequest {
   @NotNull
   @NotBlank
   private Integer page;

@@ -44,6 +44,11 @@ public class AdministratorListDto {
   @NotBlank
   private final String name;
 
+  /**
+   * Constructor for creating a new AdministratorListDto.
+   *
+   * @param administratorCompany The administrator company entity to create the DTO from.
+   */
   public AdministratorListDto(AdministratorCompany administratorCompany) {
     Administrator administrator = administratorCompany.getAdministrator();
     this.id = administrator.getId();

@@ -7,7 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
+/**
+ * DTO for representing a simple scope.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

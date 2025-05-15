@@ -13,7 +13,10 @@ import jakarta.persistence.EntityNotFoundException;
  */
 @SuppressWarnings("squid:S110")
 public class AdministratorCompanyNotFoundException extends EntityNotFoundException {
-    public AdministratorCompanyNotFoundException(String message) {
-      super(message);
-    }
+  /**
+   * Default constructor for AdministratorCompanyNotFoundException.
+   */
+  public AdministratorCompanyNotFoundException(String message) {
+    super(message);
+  }
 }

@@ -19,6 +19,11 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
   private final AdministratorRepository administratorRepository;
 
+  /**
+   * Constructor for CustomUserDetailsService.
+   *
+   * @param administratorRepository the repository for accessing administrator data.
+   */
   @Autowired
   public CustomUserDetailsService(AdministratorRepository administratorRepository) {
     this.administratorRepository = administratorRepository;
@@ -26,10 +31,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
   /**
    * Loads user details by username.
-   * <p>
-   *   This method retrieves user details from the database based on the provided username.
-   *   If the user is not found, it throws a UsernameNotFoundException.
-   *   </p>
+   *
+   * <p>This method retrieves user details from the database based on the provided username.
+   * If the user is not found, it throws a UsernameNotFoundException.
+   * </p>
+   *
    * @param usernameOrEmail the username or email of the user to be loaded.
    * @return UserDetails object containing user information.
    * @throws UsernameNotFoundException if the user is not found.
@@ -38,6 +44,9 @@ public class CustomUserDetailsService implements UserDetailsService {
   public UserDetails loadUserByUsername(String usernameOrEmail) {
     return new CustomUserDetails(
             administratorRepository.findWithAdministratorCompaniesByUsernameOrEmail(usernameOrEmail)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + usernameOrEmail)), usernameOrEmail);
+                    .orElseThrow(() -> new UsernameNotFoundException(
+                            "User not found: " + usernameOrEmail)),
+            usernameOrEmail
+    );
   }
 }

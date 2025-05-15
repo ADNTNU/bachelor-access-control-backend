@@ -1,11 +1,12 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.apikey;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.logging.Logger;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.CreateApiKeyRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.DeleteApiKeysRequest;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.requests.PaginatedCRUDListRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.apikey.dto.UpdateApiKeyRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.ErrorResponse;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.requests.PaginatedCrudListRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.ApiKeyNotFoundException;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.CompanyNotFoundException;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.ScopeNotFoundException;
@@ -14,9 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.logging.Logger;
 
 /**
  * Controller class for managing API keys.
@@ -34,6 +40,11 @@ public class ApiKeyController {
 
   private final ApiKeyService apiKeyService;
 
+  /**
+   * Constructor for ApiKeyController.
+   *
+   * @param apiKeyService the service for managing API keys
+   */
   @Autowired
   public ApiKeyController(ApiKeyService apiKeyService) {
     this.apiKeyService = apiKeyService;
@@ -42,25 +53,29 @@ public class ApiKeyController {
   /**
    * Endpoint to list API keys by company ID.
    *
-   * @param paginatedCRUDListRequest the request object containing pagination and company ID
+   * @param paginatedCrudListRequest the request object containing pagination and company ID
    * @param userDetails              the authenticated user details
-   * @return a ResponseEntity containing the list of API keys with pagination details or an error response
+   * @return a ResponseEntity containing the list of API keys with pagination details or
+   *         an error response
    */
   @PostMapping("/list")
-  public ResponseEntity<?> listApiKeysByCompanyId(@RequestBody PaginatedCRUDListRequest paginatedCRUDListRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
+  public ResponseEntity<?> listApiKeysByCompanyId(
+          @RequestBody PaginatedCrudListRequest paginatedCrudListRequest,
+          @AuthenticationPrincipal CustomUserDetails userDetails
+  ) {
     try {
-      if (!userDetails.getCompanyIds().contains(paginatedCRUDListRequest.getCompanyId())) {
+      if (!userDetails.getCompanyIds().contains(paginatedCrudListRequest.getCompanyId())) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResponse("You do not have access to this company"));
       }
 
-      if (paginatedCRUDListRequest.getPage() < 1 || paginatedCRUDListRequest.getSize() <= 0) {
+      if (paginatedCrudListRequest.getPage() < 1 || paginatedCrudListRequest.getSize() <= 0) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("Invalid page or size"));
       }
 
       return ResponseEntity.ok(
-              apiKeyService.getListOfApiKeysByCompanyId(paginatedCRUDListRequest)
+              apiKeyService.getListOfApiKeysByCompanyId(paginatedCrudListRequest)
       );
     } catch (Exception e) {
       logger.severe("Error fetching API keys: " + e.getMessage());
@@ -77,7 +92,10 @@ public class ApiKeyController {
    * @return a ResponseEntity containing the created API key or an error response
    */
   @PostMapping()
-  public ResponseEntity<?> createApiKey(@RequestBody CreateApiKeyRequest createApiKeyRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
+  public ResponseEntity<?> createApiKey(
+          @RequestBody CreateApiKeyRequest createApiKeyRequest,
+          @AuthenticationPrincipal CustomUserDetails userDetails
+  ) {
     try {
       if (!userDetails.getCompanyIds().contains(createApiKeyRequest.getCompanyId())) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -104,13 +122,17 @@ public class ApiKeyController {
   /**
    * Endpoint to update an existing API key.
    *
-   * @param id                    the ID of the API key to update
-   * @param updateApiKeyRequest   the request object containing updated API key details
-   * @param userDetails           the authenticated user details
+   * @param id                  the ID of the API key to update
+   * @param updateApiKeyRequest the request object containing updated API key details
+   * @param userDetails         the authenticated user details
    * @return a ResponseEntity containing the updated API key or an error response
    */
   @PutMapping("/{id}")
-  public ResponseEntity<?> updateApiKey(@PathVariable Long id, @RequestBody UpdateApiKeyRequest updateApiKeyRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
+  public ResponseEntity<?> updateApiKey(
+          @PathVariable Long id,
+          @RequestBody UpdateApiKeyRequest updateApiKeyRequest,
+          @AuthenticationPrincipal CustomUserDetails userDetails
+  ) {
     try {
       if (!userDetails.getCompanyIds().contains(updateApiKeyRequest.getCompanyId())) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -145,7 +167,9 @@ public class ApiKeyController {
    */
   @DeleteMapping()
   public ResponseEntity<?> deleteApiKey(
-          @RequestBody DeleteApiKeysRequest deleteApiKeysRequest, @AuthenticationPrincipal CustomUserDetails userDetails) {
+          @RequestBody DeleteApiKeysRequest deleteApiKeysRequest,
+          @AuthenticationPrincipal CustomUserDetails userDetails
+  ) {
     try {
       if (!userDetails.getCompanyIds().contains(deleteApiKeysRequest.getCompanyId())) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)

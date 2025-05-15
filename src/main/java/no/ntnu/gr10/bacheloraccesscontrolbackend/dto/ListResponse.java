@@ -2,12 +2,12 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
 
 /**
  * A generic response class for paginated lists.

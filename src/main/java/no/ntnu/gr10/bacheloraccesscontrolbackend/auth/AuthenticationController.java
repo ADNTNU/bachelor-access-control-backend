@@ -4,13 +4,18 @@ import io.jsonwebtoken.security.InvalidKeyException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.logging.Logger;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.*;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorService;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.AuthenticationResponse;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.LoginRequest;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.RefreshTokenRequest;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.RequestPasswordResetRequest;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.auth.dto.ResetPasswordRequest;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.ErrorResponse;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.dto.SuccessResponse;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.security.JwtTokenProvider;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.security.CustomUserDetails;
-import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.AdministratorService;
+import no.ntnu.gr10.bacheloraccesscontrolbackend.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +26,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.logging.Logger;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 /**
@@ -62,8 +68,8 @@ public class AuthenticationController {
 
   /**
    * Authenticates the user and returns a JWT token if successful.
-   * <p>
-   * This method handles the login request by validating the provided username and password.
+   *
+   * <p>This method handles the login request by validating the provided username and password.
    * If the credentials are valid, it generates a JWT token and returns it in the response.
    * If the credentials are invalid, it returns an unauthorized response.
    * </p>
@@ -88,22 +94,29 @@ public class AuthenticationController {
       return ResponseEntity.ok(response);
     } catch (BadCredentialsException | UsernameNotFoundException e) {
       logger.severe("Invalid credentials: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Invalid username or password"));
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+              .body(new ErrorResponse("Invalid username or password"));
     } catch (Exception e) {
       logger.severe("Error during authentication: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during authentication"));
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .body(new ErrorResponse("An error occurred during authentication"));
     }
   }
 
   /**
    * Logs out the user and invalidates the session.
-   * @param request the HTTP request
-   * @param response the HTTP response
+   *
+   * @param request        the HTTP request
+   * @param response       the HTTP response
    * @param authentication the authentication object
    * @return a ResponseEntity indicating the logout status
    */
   @PostMapping("/logout")
-  public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+  public ResponseEntity<?> logout(
+          HttpServletRequest request,
+          HttpServletResponse response,
+          Authentication authentication
+  ) {
     if (authentication != null) {
       new SecurityContextLogoutHandler().logout(request, response, authentication);
     }
@@ -112,8 +125,8 @@ public class AuthenticationController {
 
   /**
    * Requests to refresh the access token using the refresh token.
-   * <p>
-   * This method handles the token refresh request by validating the provided refresh token.
+   *
+   * <p>This method handles the token refresh request by validating the provided refresh token.
    * If the token is valid, it generates a new access token and returns it in the response.
    * If the token is invalid, it returns an unauthorized response.
    * </p>
@@ -124,7 +137,8 @@ public class AuthenticationController {
   @PostMapping("/refresh-token")
   public ResponseEntity<?> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
     try {
-      String adminIdString = tokenProvider.verifyAuthTokenAndGetAdminId(refreshTokenRequest.getRefreshToken());
+      String adminIdString = tokenProvider
+              .verifyAuthTokenAndGetAdminId(refreshTokenRequest.getRefreshToken());
       long adminId = Long.parseLong(adminIdString);
       Administrator admin = administratorService.getById(adminId);
       CustomUserDetails userDetails = new CustomUserDetails(admin, admin.getEmail());
@@ -141,18 +155,22 @@ public class AuthenticationController {
       return ResponseEntity.ok(response);
     } catch (InvalidKeyException e) {
       logger.severe("Invalid refresh token: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Invalid refresh token"));
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+              .body(new ErrorResponse("Invalid refresh token"));
     } catch (Exception e) {
       logger.severe("Error during token refresh: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during token refresh"));
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .body(new ErrorResponse("An error occurred during token refresh"));
     }
   }
 
   /**
    * Requests a password reset for the specified email address.
-   * <p>
-   * This method handles the password reset request by sending a reset link to the provided email address.
-   * If the email address is not found, it returns a success response to prevent email enumeration attacks.
+   *
+   * <p>This method handles the password reset request by sending a
+   * reset link to the provided email address.
+   * If the email address is not found, it returns a success response
+   * to prevent email enumeration attacks.
    * </p>
    *
    * @param request the request containing the email address
@@ -168,14 +186,16 @@ public class AuthenticationController {
       return ResponseEntity.ok(new SuccessResponse("Password reset request sent successfully"));
     } catch (Exception e) {
       logger.severe("Error during password reset request: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during password reset request"));
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .body(new ErrorResponse("An error occurred during password reset request"));
     }
   }
 
   /**
    * Resets the password using the provided token and new password.
-   * <p>
-   * This method handles the password reset request by validating the provided token and updating the password.
+   *
+   * <p>This method handles the password reset request by validating the
+   * provided token and updating the password.
    * If the token is invalid or expired, it returns an unauthorized response.
    * </p>
    *
@@ -188,14 +208,18 @@ public class AuthenticationController {
       administratorService.resetPassword(request.getToken(), request.getNewPassword());
       return ResponseEntity.ok(new SuccessResponse("Password reset successfully"));
     } catch (UsernameNotFoundException e) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("User not found"));
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+              .body(new ErrorResponse("User not found"));
     } catch (InvalidKeyException e) {
-      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Invalid token"));
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+              .body(new ErrorResponse("Invalid token"));
     } catch (PasswordPolicyService.WeakPasswordException e) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Invalid password"));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+              .body(new ErrorResponse("Invalid password"));
     } catch (Exception e) {
       logger.severe("Error during password reset: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("An error occurred during password reset"));
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+              .body(new ErrorResponse("An error occurred during password reset"));
     }
   }
 
