@@ -9,7 +9,12 @@ package no.ntnu.gr10.bacheloraccesscontrolbackend.exception;
  * @version 16.04.2025
  */
 public class InvalidRoleException extends IllegalArgumentException {
-    public InvalidRoleException(String message) {
-        super(message);
-    }
+  /**
+   * Default constructor for InvalidRoleException.
+   *
+   * @param message the error message to be associated with this exception
+   */
+  public InvalidRoleException(String message) {
+    super(message);
+  }
 }

@@ -13,7 +13,12 @@ import jakarta.persistence.EntityNotFoundException;
  */
 @SuppressWarnings("squid:S110")
 public class ApiKeyNotFoundException extends EntityNotFoundException {
-    public ApiKeyNotFoundException(String message) {
-      super(message);
-    }
+  /**
+   * Default constructor for ApiKeyNotFoundException.
+   *
+   * @param message The message to be displayed when the exception is thrown.
+   */
+  public ApiKeyNotFoundException(String message) {
+    super(message);
+  }
 }

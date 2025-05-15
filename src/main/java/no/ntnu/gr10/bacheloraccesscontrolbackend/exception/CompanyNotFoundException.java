@@ -13,7 +13,12 @@ import jakarta.persistence.EntityNotFoundException;
  */
 @SuppressWarnings("squid:S110")
 public class CompanyNotFoundException extends EntityNotFoundException {
-    public CompanyNotFoundException(String message) {
-      super(message);
-    }
+  /**
+   * Default constructor for CompanyNotFoundException.
+   *
+   * @param message The error message to be associated with the exception.
+   */
+  public CompanyNotFoundException(String message) {
+    super(message);
+  }
 }

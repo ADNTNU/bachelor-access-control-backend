@@ -1,11 +1,11 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.scope;
 
+import java.util.List;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.exception.ScopeNotFoundException;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.scope.dto.ScopeSimpleDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 /**
  * Service class for managing scopes.
@@ -19,6 +19,11 @@ public class ScopeService {
 
   private final ScopeRepository scopeRepository;
 
+  /**
+   * Constructor for ScopeService.
+   *
+   * @param scopeRepository the repository for accessing scope data.
+   */
   @Autowired
   public ScopeService(ScopeRepository scopeRepository) {
     this.scopeRepository = scopeRepository;
@@ -46,5 +51,5 @@ public class ScopeService {
 
   }
 
-//  TODO: Add methods for creating, updating, and deleting scopes
+  //  TODO: Add methods for creating, updating, and deleting scopes
 }

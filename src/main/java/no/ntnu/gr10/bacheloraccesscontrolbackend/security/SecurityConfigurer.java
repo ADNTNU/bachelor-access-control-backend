@@ -1,5 +1,7 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,9 +21,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.List;
-
 
 /**
  * Security configuration class for setting up authentication and authorization.
@@ -37,8 +36,18 @@ public class SecurityConfigurer {
   @Value("#{'${cors.allowedOrigins}'.split(',')}")
   private List<String> allowedOrigins;
 
+  /**
+   * Bean for JwtAuthenticationFilter.
+   *
+   * @param jwtTokenProvider   JwtTokenProvider instance for token generation and validation.
+   * @param userDetailsService UserDetailsService instance for loading user details.
+   * @return JwtAuthenticationFilter instance.
+   */
   @Bean
-  public JwtAuthenticationFilter jwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
+  public JwtAuthenticationFilter jwtAuthenticationFilter(
+          JwtTokenProvider jwtTokenProvider,
+          UserDetailsService userDetailsService
+  ) {
     return new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService);
   }
 
@@ -53,25 +62,31 @@ public class SecurityConfigurer {
     CorsConfiguration config = new CorsConfiguration();
 
     config.setAllowedOrigins(allowedOrigins);  // List of allowed origins
-    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));  // Allowed HTTP methods
+    config.setAllowedMethods(
+            Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")
+    );
     config.setAllowedHeaders(List.of("*"));
     boolean shouldAllowCredentials = allowedOrigins.stream().noneMatch(orig -> orig.equals("*"));
-    config.setAllowCredentials(shouldAllowCredentials);  // Allow credentials (cookies, authorization headers)
+    config.setAllowCredentials(shouldAllowCredentials);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", config);  // Apply CORS configuration to all paths
+    source.registerCorsConfiguration("/**", config);
 
     return source;
   }
 
   /**
    * Configures the security filter chain for HTTP requests.
+   *
    * @param httpSecurity The HttpSecurity object to configure.
    * @return a SecurityFilterChain instance.
    * @throws Exception Throws Exception if there's an error during configuration.
    */
   @Bean
-  protected SecurityFilterChain configure(HttpSecurity httpSecurity, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+  protected SecurityFilterChain configure(
+          HttpSecurity httpSecurity,
+          JwtAuthenticationFilter jwtAuthenticationFilter
+  ) throws Exception {
     httpSecurity
             .csrf(AbstractHttpConfigurer::disable)
             .cors(Customizer.withDefaults())
@@ -80,7 +95,9 @@ public class SecurityConfigurer {
                     .requestMatchers("/administrator/register-from-invite").permitAll()
                     .requestMatchers("/administrator/accept-invite").permitAll()
                     .anyRequest().authenticated())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(
+                    session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     return httpSecurity.build();
   }
@@ -89,9 +106,9 @@ public class SecurityConfigurer {
    * Configures the authentication manager for user authentication.
    * Uses the provided UserDetailsService and PasswordEncoder defined with Bean methods.
    *
-   * @param http The HttpSecurity object to configure.
+   * @param http               The HttpSecurity object to configure.
    * @param userDetailsService The UserDetailsService for loading user details.
-   * @param passwordEncoder The PasswordEncoder for encoding passwords.
+   * @param passwordEncoder    The PasswordEncoder for encoding passwords.
    * @return an AuthenticationManager instance.
    * @throws Exception Throws Exception if there's an error during configuration.
    */

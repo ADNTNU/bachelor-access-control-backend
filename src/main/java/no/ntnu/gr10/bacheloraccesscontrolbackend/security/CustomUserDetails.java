@@ -1,5 +1,11 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.security;
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administrator.Administrator;
 import no.ntnu.gr10.bacheloraccesscontrolbackend.administratorcompany.AdministratorCompany;
@@ -7,12 +13,11 @@ import no.ntnu.gr10.bacheloraccesscontrolbackend.company.Company;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Custom implementation of the UserDetails interface.
- * This class represents the user details used by Spring Security for authentication and authorization.
+ * This class represents the user details used by Spring Security for
+ * authentication and authorization.
  * It contains the username, password, enabled status, and authorities (roles) of the user.
  * The constructor takes an Administrator object and initializes the user details.
  *

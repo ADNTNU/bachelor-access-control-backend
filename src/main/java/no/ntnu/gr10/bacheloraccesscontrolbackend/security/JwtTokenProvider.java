@@ -4,15 +4,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.InvalidKeyException;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
 
 /**
  * Utility class for generating and verifying JWT tokens.
@@ -45,8 +44,8 @@ public class JwtTokenProvider {
 
   /**
    * Generates a JWT token for the given authentication.
-   * <p>
-   * This method creates a JWT token using the provided authentication information.
+   *
+   * <p>This method creates a JWT token using the provided authentication information.
    * The token includes the username, issued date, and expiration date.
    * </p>
    *
@@ -73,8 +72,8 @@ public class JwtTokenProvider {
 
   /**
    * Generates a refresh token for the given authentication.
-   * <p>
-   * This method creates a JWT token using the provided authentication information.
+   *
+   * <p>This method creates a JWT token using the provided authentication information.
    * The token includes the adminId, issued date, and expiration date.
    * </p>
    *
@@ -98,8 +97,8 @@ public class JwtTokenProvider {
 
   /**
    * Verifies the given JWT token and retrieves the username from it.
-   * <p>
-   * This method checks the validity of the provided JWT token and extracts the username from it.
+   *
+   * <p>This method checks the validity of the provided JWT token and extracts the username from it.
    * </p>
    *
    * @param token the JWT token to verify
@@ -116,8 +115,8 @@ public class JwtTokenProvider {
 
   /**
    * Verifies the given JWT token and retrieves the admin ID from it.
-   * <p>
-   * This method checks the validity of the provided JWT token and extracts the admin ID from it.
+   *
+   * <p>This method checks the validity of the provided JWT token and extracts the admin ID from it.
    * </p>
    *
    * @param token the JWT token to verify
@@ -133,8 +132,8 @@ public class JwtTokenProvider {
 
   /**
    * Generates an invitation token for the given admin and company.
-   * <p>
-   * This method creates a JWT token for inviting an admin to a company.
+   *
+   * <p>This method creates a JWT token for inviting an admin to a company.
    * The token includes the company ID, admin ID and registration status.
    * </p>
    *
@@ -144,7 +143,12 @@ public class JwtTokenProvider {
    * @return the generated invite token
    * @throws InvalidKeyException if the signing key is invalid
    */
-  public String generateInviteToken(String adminId, String companyId, boolean registered, String companyName) throws InvalidKeyException {
+  public String generateInviteToken(
+          String adminId,
+          String companyId,
+          boolean registered,
+          String companyName
+  ) throws InvalidKeyException {
     Date now = new Date();
     // 24h
     long expirationMs = 28800000L;
@@ -164,8 +168,9 @@ public class JwtTokenProvider {
 
   /**
    * Verifies the given invite token and retrieves the company ID and admin ID from it.
-   * <p>
-   * This method checks the validity of the provided invite token and extracts the company ID and admin ID from it.
+   *
+   * <p>This method checks the validity of the provided invite token and extracts the
+   * company ID and admin ID from it.
    * </p>
    *
    * @param token the invite token to verify
@@ -173,7 +178,8 @@ public class JwtTokenProvider {
    * @throws JwtException             if the token is invalid or expired
    * @throws IllegalArgumentException if the token is null or empty
    */
-  public Pair<Long, Long> verifyInviteTokenAndGetCompanyAndAdminId(String token) throws JwtException {
+  public Pair<Long, Long> verifyInviteTokenAndGetCompanyAndAdminId(String token)
+          throws JwtException {
 
     try {
       Claims claims = verifyTokenAndGetClaims(token);
@@ -199,8 +205,8 @@ public class JwtTokenProvider {
 
   /**
    * Generates a password reset token for the given admin.
-   * <p>
-   * This method creates a JWT token for resetting the password of an admin.
+   *
+   * <p>This method creates a JWT token for resetting the password of an admin.
    * The token includes the admin ID and expiration date.
    * </p>
    *
@@ -223,8 +229,9 @@ public class JwtTokenProvider {
 
   /**
    * Verifies the given password reset token and retrieves the admin ID from it.
-   * <p>
-   * This method checks the validity of the provided password reset token and extracts the admin ID from it.
+   *
+   * <p>This method checks the validity of the provided password reset token
+   * and extracts the admin ID from it.
    * </p>
    *
    * @param token the password reset token to verify

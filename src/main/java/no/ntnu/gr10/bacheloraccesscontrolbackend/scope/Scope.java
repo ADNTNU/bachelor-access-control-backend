@@ -1,13 +1,21 @@
 package no.ntnu.gr10.bacheloraccesscontrolbackend.scope;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Represents a scope to limit access to a subset of API endpoints.
- * <p>
- * A scope is a specific area of access control that can be assigned to API keys.
+ *
+ * <p>A scope is a specific area of access control that can be assigned to API keys.
  * </p>
  */
+@Getter
 @Entity
 @Table(name = "api_scopes")
 public class Scope {
@@ -19,6 +27,7 @@ public class Scope {
   @Column(name = "scope_key", unique = true, nullable = false)
   private String key;
 
+  @Setter
   @Column(nullable = false)
   private boolean enabled = true;
 
@@ -28,6 +37,9 @@ public class Scope {
   @Column(nullable = false)
   private String description;
 
+  /**
+   * Default constructor for JPA.
+   */
   public Scope() {
     // Default constructor for JPA
   }
@@ -54,14 +66,6 @@ public class Scope {
     return id;
   }
 
-  /**
-   * Get the unique key of the scope.
-   *
-   * @return The unique key of the scope.
-   */
-  public String getKey() {
-    return key;
-  }
 
   /**
    * Set the unique key of the scope.
@@ -80,33 +84,6 @@ public class Scope {
     }
 
     this.key = key;
-  }
-
-  /**
-   * Get the enabled status of the scope.
-   *
-   * @return true if the scope is enabled, false otherwise.
-   */
-  public boolean isEnabled() {
-    return enabled;
-  }
-
-  /**
-   * Set the enabled status of the scope.
-   *
-   * @param enabled The enabled status to set.
-   */
-  public void setEnabled(boolean enabled) {
-    this.enabled = enabled;
-  }
-
-  /**
-   * Get the name of the scope.
-   *
-   * @return The name of the scope.
-   */
-  public String getName() {
-    return name;
   }
 
   /**
@@ -129,15 +106,6 @@ public class Scope {
   }
 
   /**
-   * Get the description of the scope.
-   *
-   * @return The description of the scope.
-   */
-  public String getDescription() {
-    return description;
-  }
-
-  /**
    * Set the description of the scope.
    *
    * @param description The description to set.
@@ -150,6 +118,4 @@ public class Scope {
 
     this.description = description;
   }
-
-
 }

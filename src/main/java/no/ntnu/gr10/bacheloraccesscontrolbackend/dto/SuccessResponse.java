@@ -8,6 +8,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * DTO for success responses.
+ * Contains a message indicating the success of an operation.
+ *
+ * @author Anders Lund
+ * @version 23.04.2025
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
