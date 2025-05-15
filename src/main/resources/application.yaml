@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: bachelor-access-control-backend
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME:devuser}
+    password: ${DB_PASSWORD:devpass123}
+    # replace localhost with the database host, 3306 with port number, library
+    # with the database name you use
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3307}/${DB_NAME:dev}?createDatabaseIfNotExist=true
+  # If you want to see the SQL queries executed by the framework, uncomment the
+  # next line:
+  #spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: ${DDL:create}
+
+jwt_secret: ${JWT_TOKEN:WouldAWoodchuckChuckIfARoundhouseKick}
+
+server:
+  port: ${PORT:8085}
+
+cors:
+  allowedOrigins: ${CORS_ORIGINS:https://flightfinder.space}
+
+sendgrid:
+  api:
+    key: ${SENDGRID_API_KEY}
+  template:
+    reset-password: d-1064679ee0e448b29bbbab4d21009a3c
+    invite-admin: d-5741e5b58cf04ddfa2c621d46aa31b1d
+
+frontend:
+  base:
+    url: ${FRONTEND_BASE_URL:https://flightfinder.space}
